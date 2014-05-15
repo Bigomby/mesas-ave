@@ -11,6 +11,19 @@
     <string name="drawer_open">Manú abierto</string>
     <string name="drawer_close">Manú cerrado</string>
 
+    //Action bar
+    <string name="menu_config">Configuración</string>
+    <string name="menu_add">Añadir mesa</string>
+
+    //AddTableActivity
+    <string name="origin">Selecciona el origen</string>
+    <string name="destiny">Selecciona el destino</string>
+    <string name="departure">Hora de salida</string>
+    <string name="done">Hecho</string>
+    <string name="cancel">Cancelar</string>
+    <string name="donebuttonactivity_description">Crear mesa</string>
+    <string name="done_bar_description">Crear mesa</string>
+
     <string-array name="navigation_drawer_elements">
         <item>Inicio</item>
         <item>Mis mesas</item>
