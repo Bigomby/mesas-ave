@@ -9,14 +9,15 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
-import android.view.Menu;
-import android.view.MenuInflater;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.bigomby.compartemesa.data.Table;
+import com.bigomby.compartemesa.search.SearchFragment;
 import com.bigomby.compartemesa.tables.AddTableActivity;
 import com.bigomby.compartemesa.tables.TableFragment;
 
@@ -29,17 +30,27 @@ public class MainActivity extends ActionBarActivity {
     private CharSequence tituloApp;
     private ActionBarDrawerToggle drawerToggle;
     Fragment fragment;
+    Table myTable = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        if (myTable != null) {
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("table", myTable);
+            fragment = new TableFragment();
+            fragment.setArguments(bundle);
+        } else {
+            fragment = new TableFragment();
+        }
+
         FragmentManager fragmentManager =
                 getSupportFragmentManager();
 
         fragmentManager.beginTransaction()
-                .replace(R.id.content_frame, new Home())
+                .replace(R.id.content_frame, new TableFragment())
                 .commit();
 
         tituloSeccion = (String) getTitle();
@@ -62,16 +73,20 @@ public class MainActivity extends ActionBarActivity {
 
                 switch (position) {
                     case 0:
-                        fragment = new Home();
+                        if (myTable != null) {
+                            Bundle bundle = new Bundle();
+                            bundle.putSerializable("table", myTable);
+                            fragment = new TableFragment();
+                            fragment.setArguments(bundle);
+                        } else {
+                            fragment = new TableFragment();
+                        }
                         break;
                     case 1:
-                        fragment = new TableFragment();
+                        fragment = new SearchFragment();
                         break;
                     case 2:
-                        fragment = new Search();
-                        break;
-                    case 3:
-                        fragment = new Config();
+                        fragment = new ConfigActivity();
                         break;
                 }
 
@@ -123,7 +138,6 @@ public class MainActivity extends ActionBarActivity {
 
     }
 
-
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
@@ -144,13 +158,47 @@ public class MainActivity extends ActionBarActivity {
         }
 
         // Handle presses on the action bar items
+        Intent intent;
         switch (item.getItemId()) {
             case R.id.action_add:
-                Intent intent = new Intent(this, AddTableActivity.class);
-                startActivity(intent);
+                intent = new Intent(this, AddTableActivity.class);
+                startActivityForResult(intent, 1);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    public void onClick(View view) {
+        if (view.getId() == R.id.create_table) {
+            Intent intent = new Intent(this, AddTableActivity.class);
+            startActivityForResult(intent, 1);
+        }
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if (requestCode == 1) {
+            if (resultCode == RESULT_OK) {
+                myTable = (Table) data.getSerializableExtra("table");
+
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("table", myTable);
+                fragment = new TableFragment();
+                fragment.setArguments(bundle);
+
+                FragmentManager fragmentManager =
+                        getSupportFragmentManager();
+
+                fragmentManager.beginTransaction()
+                        .replace(R.id.content_frame, fragment)
+                        .commitAllowingStateLoss();
+
+                Log.d("MESA", "La tabla recibida tiene origen " + myTable.getOrigin());
+            }
+            if (resultCode == RESULT_CANCELED) {
+                //Write your code if there's no result
+            }
         }
     }
 }

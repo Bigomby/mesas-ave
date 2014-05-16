@@ -15,6 +15,9 @@
     <string name="menu_config">Configuración</string>
     <string name="menu_add">Añadir mesa</string>
 
+    //TableFragment
+    <string name="no_table">Crear mesa</string>
+
     //AddTableActivity
     <string name="origin">Selecciona el origen</string>
     <string name="destiny">Selecciona el destino</string>
@@ -25,9 +28,8 @@
     <string name="done_bar_description">Crear mesa</string>
 
     <string-array name="navigation_drawer_elements">
-        <item>Inicio</item>
-        <item>Mis mesas</item>
-        <item>Buscar compañeros</item>
+        <item>Mi mesa</item>
+        <item>Buscar mesas</item>
         <item>Configuración</item>
     </string-array>
 
