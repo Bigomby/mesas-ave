@@ -8,7 +8,7 @@
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:background="#E3E3E3">
+        android:background="#D0D0D0">
 
         <!-- title -->
         <TextView
@@ -16,6 +16,7 @@
             android:text="@string/origin"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textStyle="bold"
             android:gravity="center_vertical"
             android:textSize="16dp"
             android:layout_marginLeft="12dp"
@@ -24,11 +25,9 @@
 
         <!--  divider -->
         <View
+            android:background="?android:attr/dividerHorizontal"
             android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginBottom="1dp"
-            android:layout_alignParentBottom="true"
-            android:background="#BABABA"></View>
+            android:layout_height="0.9dp" />
     </RelativeLayout>
 
     <Spinner
@@ -42,13 +41,14 @@
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:background="#E3E3E3">
+        android:background="#D0D0D0">
 
         <!-- title -->
         <TextView
             android:id="@+id/destinySelect"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textStyle="bold"
             android:gravity="center_vertical"
             android:textSize="16dp"
             android:layout_marginLeft="12dp"
@@ -58,11 +58,9 @@
 
         <!--  divider -->
         <View
+            android:background="?android:attr/dividerHorizontal"
             android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginBottom="1dp"
-            android:layout_alignParentBottom="true"
-            android:background="#BABABA"></View>
+            android:layout_height="0.9dp" />
 
     </RelativeLayout>
 
@@ -77,7 +75,7 @@
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:background="#E3E3E3">
+        android:background="#D0D0D0">
 
         <!-- title -->
         <TextView
@@ -86,6 +84,7 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:textSize="16dp"
+            android:textStyle="bold"
             android:layout_marginLeft="12dp"
             android:layout_marginBottom="4dp"
             android:layout_alignParentBottom="true"
@@ -93,11 +92,9 @@
 
         <!--  divider -->
         <View
+            android:background="?android:attr/dividerHorizontal"
             android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginBottom="1dp"
-            android:layout_alignParentBottom="true"
-            android:background="#BABABA"></View>
+            android:layout_height="0.9dp" />
 
     </RelativeLayout>
 

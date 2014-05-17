@@ -17,10 +17,15 @@
 
     //TableFragment
     <string name="no_table">Crear mesa</string>
+    <string name="send">Enviar</string>
+    <string name="type_message">Enviar mensaje</string>
+    <string name="origin">Ciudad origen</string>
+    <string name="destiny">Ciudad destino</string>
+    <string name="user">Usuario</string>
 
     //AddTableActivity
-    <string name="origin">Selecciona el origen</string>
-    <string name="destiny">Selecciona el destino</string>
+    <string name="select_origin">Selecciona el origen</string>
+    <string name="select_destiny">Selecciona el destino</string>
     <string name="departure">Hora de salida</string>
     <string name="done">Hecho</string>
     <string name="cancel">Cancelar</string>

@@ -18,6 +18,7 @@ import com.bigomby.compartemesa.R;
 import com.bigomby.compartemesa.data.Cities;
 import com.bigomby.compartemesa.data.City;
 import com.bigomby.compartemesa.data.Table;
+import com.bigomby.compartemesa.data.User;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,10 +50,10 @@ public class AddTableActivity extends Activity implements AdapterView.OnItemSele
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        table = new Table();
-                        table.setDestiny(destiny);
-                        table.setOrigin(origin);
+                        table = new Table(origin , destiny, new User("Diego"));
                         Log.d("DIEGO:", "La tabla creada tiene origen " + table.getOrigin());
+                        Log.d("DIEGO:", "La tabla creada tiene destino " + table.getDestiny());
+                        Log.d("DIEGO:", "La tabla creada tiene el usuario " + table.getUsers().get(0));
                         Intent resultIntent = new Intent();
                         resultIntent.putExtra("table", table);
                         setResult(Activity.RESULT_OK, resultIntent);
