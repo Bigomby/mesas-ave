@@ -1,35 +1,35 @@
 package com.bigomby.compartemesa.data;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
-/**
- * Created by diego on 16/05/14.
- */
-public class Cities {
+public class Cities extends ArrayList<City> {
 
-    List<City> cities = new ArrayList<City>();
+    public Cities() {
+        this.add(new City("Madrid"));
+        this.add(new City("Barcelona"));
+        this.add(new City("Valencia"));
+        this.add(new City("Sevilla"));
+        this.add(new City("Málaga"));
+        this.add(new City("Valladolid"));
+        this.add(new City("Córdoba"));
+    }
 
-    // TODO Cargar las ciudadades de la BBDD
-
-    public Cities(){
-        cities.add(new City("Sevilla"));
-        cities.add(new City("Madrid"));
-        cities.add(new City("Barcelona"));
-        cities.add(new City("Valencia"));
-        cities.add(new City("Málaga"));
-        cities.add(new City("Córdoba"));
-        cities.add(new City("Valladolid"));
+    public String getCityName(int id) {
+        return this.get(id).getCityName();
     }
 
     public List<String> toListString() {
-        Iterator<City> it = cities.iterator();
         List<String> stringsCities = new ArrayList<String>();
 
-        while (it.hasNext()){
-            stringsCities.add(it.next().getName());
+        for (int i = 0; i < this.size(); i++) {
+            stringsCities.add(this.get(i).getCityName());
         }
+
         return stringsCities;
     }
 }

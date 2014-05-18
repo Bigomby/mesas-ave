@@ -1,19 +1,22 @@
 package com.bigomby.compartemesa.data;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-/**
- * Created by diego on 14/05/14.
- */
-public class City implements Serializable{
+public class City implements Serializable {
 
     private String cityName;
+    private int[] allowedDestiniesIds;
 
     public City(String cityName) {
         this.cityName = cityName;
     }
 
-    public String getName() {
+    public String getCityName() {
         return cityName;
     }
+
 }

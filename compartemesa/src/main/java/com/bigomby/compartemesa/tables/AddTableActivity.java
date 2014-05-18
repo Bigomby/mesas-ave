@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,64 +15,109 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
+import com.bigomby.compartemesa.ComparteMesaApplication;
+import com.bigomby.compartemesa.MainActivity;
 import com.bigomby.compartemesa.R;
 import com.bigomby.compartemesa.data.Cities;
 import com.bigomby.compartemesa.data.City;
 import com.bigomby.compartemesa.data.Table;
 import com.bigomby.compartemesa.data.User;
+import com.bigomby.compartemesa.data.myTableSQLConfigManager;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by diego on 15/05/14.
- */
 public class AddTableActivity extends Activity implements AdapterView.OnItemSelectedListener {
 
-    Spinner originSpinner;
-    Spinner destinySpinner;
-    City origin;
-    City destiny;
-    Table table = null;
+    int origin;
+    int destiny;
+    SharedPreferences pref = null;
 
-    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     @Override
-    public void onCreate(Bundle outState) {
-        super.onCreate(outState);
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-        this.table = table;
-        // BEGIN_INCLUDE (inflate_set_custom_view)
-        // Inflate a "Done/Cancel" custom action bar view.
+        //  Configuro la ActionBar para esta actividad
+        configActionBar();
+
+        //  Ajusto el layout a usar y relleno los datos de los Views
+        setContentView(R.layout.add_table);
+
+        List<String> stringCities = ComparteMesaApplication.cities.toListString();
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_item, stringCities);
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        final Spinner originSpinner = (Spinner) findViewById(R.id.origin_spinner);
+        originSpinner.setAdapter(adapter);
+        originSpinner.setOnItemSelectedListener(this);
+
+        final Spinner destinySpinner = (Spinner) findViewById(R.id.destiny_spinner);
+        destinySpinner.setAdapter(adapter);
+        destinySpinner.setOnItemSelectedListener(this);
+    }
+
+    /*
+     * Función de callback para los spinners
+     */
+    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+
+        if (parent.getId() == R.id.origin_spinner) {
+            origin = pos;
+        } else if (parent.getId() == R.id.destiny_spinner) {
+            destiny = pos;
+        }
+    }
+
+    /*
+     *  Función de callback para los spinners
+     */
+    @Override
+    public void onNothingSelected(AdapterView<?> arg0) {
+
+    }
+
+    /*
+     *  Función para cargar el nombre de usuario de las preferencias
+     */
+    private String loadName() {
+        String name;
+        int mode = Activity.MODE_PRIVATE;
+        pref = getSharedPreferences("prefs", mode);
+        return pref.getString("name", "Usuario");
+    }
+
+    /*
+     *  Función para configurar los botones de la ActionBar
+     */
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+    private void configActionBar() {
         final LayoutInflater inflater = (LayoutInflater) getActionBar().getThemedContext()
                 .getSystemService(LAYOUT_INFLATER_SERVICE);
+
         final View customActionBarView = inflater.inflate(
                 R.layout.actionbar_custom_view_done_cancel, null);
         customActionBarView.findViewById(R.id.actionbar_done).setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        table = new Table(origin , destiny, new User("Diego"));
-                        Log.d("DIEGO:", "La tabla creada tiene origen " + table.getOrigin());
-                        Log.d("DIEGO:", "La tabla creada tiene destino " + table.getDestiny());
-                        Log.d("DIEGO:", "La tabla creada tiene el usuario " + table.getUsers().get(0));
-                        Intent resultIntent = new Intent();
-                        resultIntent.putExtra("table", table);
-                        setResult(Activity.RESULT_OK, resultIntent);
+                        addTable();
                         finish();
                     }
                 }
         );
+
         customActionBarView.findViewById(R.id.actionbar_cancel).setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Intent returnIntent = new Intent();
-                        setResult(RESULT_CANCELED, returnIntent);
                         finish();
                     }
                 }
         );
-        // Show the custom action bar view and hide the normal Home icon and title.
+
         final ActionBar actionBar = getActionBar();
         actionBar.setDisplayOptions(
                 ActionBar.DISPLAY_SHOW_CUSTOM,
@@ -83,38 +129,15 @@ public class AddTableActivity extends Activity implements AdapterView.OnItemSele
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.MATCH_PARENT)
         );
-        // END_INCLUDE (inflate_set_custom_view)
-        setContentView(R.layout.add_table);
-
-        Cities cities = new Cities();
-        List<String> mCities = cities.toListString();
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_item, mCities);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-        originSpinner = (Spinner) findViewById(R.id.origin_spinner);
-        originSpinner.setAdapter(adapter);
-        originSpinner.setOnItemSelectedListener(this);
-
-        destinySpinner = (Spinner) findViewById(R.id.destiny_spinner);
-        destinySpinner.setAdapter(adapter);
-        destinySpinner.setOnItemSelectedListener(this);
     }
 
-    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+    private void addTable() {
+        myTableSQLConfigManager myTableDb = new myTableSQLConfigManager(this, "myTableDb", null, 1);
 
-        Log.d("MESA", "Click en " + parent.getId());
-        if (parent.getId() == R.id.origin_spinner) {
-            origin = new City((String) parent.getItemAtPosition(pos));
-            Log.d("MESA", "Origen configurado a: " + origin.getName());
-        } else if (parent.getId() == R.id.destiny_spinner) {
-            destiny = new City((String) parent.getItemAtPosition(pos));
-        }
-    }
+        Table newTable = new Table(origin, destiny);
+        newTable.addUser(loadName());
 
-    @Override
-    public void onNothingSelected(AdapterView<?> arg0) {
-        // TODO Auto-generated method stub
+        myTableDb.saveMyTable(newTable);
+
     }
 }

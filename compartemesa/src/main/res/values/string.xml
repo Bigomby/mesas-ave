@@ -14,6 +14,7 @@
     //Action bar
     <string name="menu_config">Configuración</string>
     <string name="menu_add">Añadir mesa</string>
+    <string name="menu_remove">Eliminar mesa</string>
 
     //TableFragment
     <string name="no_table">Crear mesa</string>
