@@ -1,5 +1,6 @@
 package com.bigomby.compartemesa;
 
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -14,67 +15,155 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.bigomby.compartemesa.data.myTableSQLConfigManager;
+import com.bigomby.compartemesa.search.SearchFragment;
+import com.bigomby.compartemesa.tables.AddTableActivity;
+import com.bigomby.compartemesa.tables.TableFragment;
+
 public class MainActivity extends ActionBarActivity {
 
-    private String[] opcionesMenu;
-    private DrawerLayout drawerLayout;
-    private ListView drawerList;
     private String tituloSeccion;
-    private CharSequence tituloApp;
     private ActionBarDrawerToggle drawerToggle;
-    Fragment fragment;
+    private Fragment fragment = null;
+    private Fragment tableFragment;
+    private Fragment searchFragment;
+    private Fragment configFragment;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        FragmentManager fragmentManager =
-                getSupportFragmentManager();
+        searchFragment = new SearchFragment();
+        configFragment = new ConfigActivity();
 
-        fragmentManager.beginTransaction()
-                .replace(R.id.content_frame, new Home())
-                .commit();
 
-        tituloSeccion = (String) getTitle();
+        //  Inicializo el NavigationDrawer y la ActionBar
 
-        opcionesMenu = getResources().getStringArray(R.array.navigation_drawer_elements);
-        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawerList = (ListView) findViewById(R.id.left_drawer);
+        init();
+
+    }
+
+    /**
+     * ***************************************************************
+     * Función de callback para el NavigationDrawer y la ActionBar    *
+     * ****************************************************************
+     */
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        drawerToggle.syncState();
+    }
+
+    /**
+     * ***************************************************************
+     * Función de callback para el NavigationDrawer y la ActionBar    *
+     * ****************************************************************
+     */
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        drawerToggle.onConfigurationChanged(newConfig);
+    }
+
+    /**
+     * ***************************************************************
+     * Función de callback para el NavigationDrawer y la ActionBar    *
+     * ****************************************************************
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        if (drawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
+
+        // Handle presses on the action bar items
+        Intent intent;
+        switch (item.getItemId()) {
+            case R.id.action_add:
+                intent = new Intent(this, AddTableActivity.class);
+                startActivity(intent);
+                return true;
+            case R.id.action_discard:
+                removeMyTable();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    /**
+     * ***************************************************************
+     * Función de callback para el NavigationDrawer y la ActionBar    *
+     * ****************************************************************
+     */
+    public void onClick(View view) {
+        if (view.getId() == R.id.create_table) {
+            Intent intent = new Intent(this, AddTableActivity.class);
+            startActivity(intent);
+        }
+    }
+
+    /**
+     * ********************************************
+     * Inicializo el NavigatonDrawer y la ActionBar *
+     * **********************************************
+     */
+    private void init() {
+        final String[] opcionesMenu = getResources().getStringArray(R.array.navigation_drawer_elements);
+        final DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        final ListView drawerList = (ListView) findViewById(R.id.left_drawer);
+        final CharSequence tituloApp = getTitle();
 
         drawerList.setAdapter(new ArrayAdapter<String>(
                 getSupportActionBar().getThemedContext(),
                 android.R.layout.simple_list_item_1, opcionesMenu));
-
 
         drawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView parent, View view,
                                     int position, long id) {
 
-                fragment = null;
-
                 switch (position) {
                     case 0:
-                        fragment = new Home();
+                        if (!(fragment instanceof TableFragment)) {
+                            fragment = tableFragment;
+
+                            FragmentManager fragmentManager =
+                                    getSupportFragmentManager();
+
+                            fragmentManager.beginTransaction()
+                                    .replace(R.id.content_frame, fragment)
+                                    .commit();
+                        }
                         break;
                     case 1:
-                        fragment = new Tables();
+                        if (!(fragment instanceof SearchFragment)) {
+                            fragment = searchFragment;
+
+                            FragmentManager fragmentManager =
+                                    getSupportFragmentManager();
+
+                            fragmentManager.beginTransaction()
+                                    .replace(R.id.content_frame, fragment)
+                                    .commit();
+                        }
                         break;
                     case 2:
-                        fragment = new Search();
-                        break;
-                    case 3:
-                        fragment = new Config();
+                        if (!(fragment instanceof ConfigActivity)) {
+                            fragment = configFragment;
+
+                            FragmentManager fragmentManager =
+                                    getSupportFragmentManager();
+
+                            fragmentManager.beginTransaction()
+                                    .replace(R.id.content_frame, fragment)
+                                    .commit();
+                        }
                         break;
                 }
-
-                FragmentManager fragmentManager =
-                        getSupportFragmentManager();
-
-                fragmentManager.beginTransaction()
-                        .replace(R.id.content_frame, fragment)
-                        .commit();
 
                 drawerList.setItemChecked(position, true);
 
@@ -89,8 +178,6 @@ public class MainActivity extends ActionBarActivity {
                 drawerLayout.closeDrawer(drawerList);
             }
         });
-
-        tituloApp = getTitle();
 
         drawerToggle = new ActionBarDrawerToggle(this,
                 drawerLayout,
@@ -116,24 +203,31 @@ public class MainActivity extends ActionBarActivity {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public void onResume() {
+        super.onResume();
 
-        if (drawerToggle.onOptionsItemSelected(item)) {
-            return true;
+        // Actualizo el fragmento
+        ComparteMesaApplication app = (ComparteMesaApplication) getApplication();
+        if (app.isDatabaseUpdate()) {
+            if (fragment == null || fragment instanceof TableFragment) {
+                tableFragment = new TableFragment();
+                fragment = tableFragment;
+            }
+
+            FragmentManager fragmentManager =
+                    getSupportFragmentManager();
+
+            fragmentManager.beginTransaction()
+                    .replace(R.id.content_frame, fragment)
+                    .commit();
         }
-
-        return false;
     }
 
-    @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-        drawerToggle.syncState();
-    }
+    private void removeMyTable() {
 
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        drawerToggle.onConfigurationChanged(newConfig);
+        myTableSQLConfigManager myTableDb = new myTableSQLConfigManager(this, "myTableDb", null, 1);
+        myTableDb.removeMyTable();
+
+        onResume();
     }
 }

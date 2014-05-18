@@ -11,10 +11,31 @@
     <string name="drawer_open">Manú abierto</string>
     <string name="drawer_close">Manú cerrado</string>
 
+    //Action bar
+    <string name="menu_config">Configuración</string>
+    <string name="menu_add">Añadir mesa</string>
+    <string name="menu_remove">Eliminar mesa</string>
+
+    //TableFragment
+    <string name="no_table">Crear mesa</string>
+    <string name="send">Enviar</string>
+    <string name="type_message">Enviar mensaje</string>
+    <string name="origin">Ciudad origen</string>
+    <string name="destiny">Ciudad destino</string>
+    <string name="user">Usuario</string>
+
+    //AddTableActivity
+    <string name="select_origin">Selecciona el origen</string>
+    <string name="select_destiny">Selecciona el destino</string>
+    <string name="departure">Hora de salida</string>
+    <string name="done">Hecho</string>
+    <string name="cancel">Cancelar</string>
+    <string name="donebuttonactivity_description">Crear mesa</string>
+    <string name="done_bar_description">Crear mesa</string>
+
     <string-array name="navigation_drawer_elements">
-        <item>Inicio</item>
-        <item>Mis mesas</item>
-        <item>Buscar compañeros</item>
+        <item>Mi mesa</item>
+        <item>Buscar mesas</item>
         <item>Configuración</item>
     </string-array>
 

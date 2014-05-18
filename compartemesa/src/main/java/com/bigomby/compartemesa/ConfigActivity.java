@@ -6,7 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-public class Config extends Fragment {
+public class ConfigActivity extends Fragment {
 
     @Override
     public View onCreateView(

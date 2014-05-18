@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
+
+    <include
+        android:layout_width="fill_parent"
+        android:layout_height="60dp"
+        layout="@layout/table_origin_destinty"/>
+
+    <View
+        android:background="?android:attr/dividerHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="0.9dp" />
+
+    <include
+        android:layout_width="fill_parent"
+        android:layout_height="60dp"
+        layout="@layout/table_users_bar"/>
+
+    <View
+        android:background="?android:attr/dividerHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="0.9dp" />
+
+    <ListView
+        android:id="@+id/message_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="@android:color/transparent"
+        android:dividerHeight="0dip"
+        android:footerDividersEnabled="false"
+        android:headerDividersEnabled="false"
+        android:stackFromBottom="true"
+        android:transcriptMode="alwaysScroll">
+    </ListView>
+
+    <View
+        android:background="?android:attr/dividerHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="0.9dp" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/white" >
+
+        <EditText
+            android:id="@+id/text_send"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dip"
+            android:layout_weight="1"
+            android:hint="@string/type_message"
+            android:imeOptions="actionSend"
+            android:inputType="text"
+            android:minHeight="48dip"
+            android:nextFocusRight="@+id/btn_send"
+            android:textSize="16sp">
+            <requestFocus />
+        </EditText>
+
+        <ImageButton
+            android:id="@+id/btn_send"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="4dip"
+            android:contentDescription="@string/send"
+            android:drawablePadding="0dip"
+            android:src="@drawable/ic_action_send_now" />
+    </LinearLayout>
+
+</TableLayout>
