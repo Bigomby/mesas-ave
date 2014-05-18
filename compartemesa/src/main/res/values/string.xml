@@ -33,6 +33,10 @@
     <string name="donebuttonactivity_description">Crear mesa</string>
     <string name="done_bar_description">Crear mesa</string>
 
+    //ConfigActivity
+    <string name="username">Nombre de usuario</string>
+    <string name="saveusername">Guardar</string>
+
     <string-array name="navigation_drawer_elements">
         <item>Mi mesa</item>
         <item>Buscar mesas</item>

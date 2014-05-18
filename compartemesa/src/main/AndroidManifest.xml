@@ -17,6 +17,7 @@
             </intent-filter>
         </activity>
         <activity android:name="com.bigomby.compartemesa.tables.AddTableActivity" />
+        <activity android:name="com.bigomby.compartemesa.ConfigActivity" />
     </application>
 
 </manifest>

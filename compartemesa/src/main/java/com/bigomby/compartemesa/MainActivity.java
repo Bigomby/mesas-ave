@@ -27,7 +27,6 @@ public class MainActivity extends ActionBarActivity {
     private Fragment fragment = null;
     private Fragment tableFragment;
     private Fragment searchFragment;
-    private Fragment configFragment;
 
 
     @Override
@@ -36,11 +35,8 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.activity_main);
 
         searchFragment = new SearchFragment();
-        configFragment = new ConfigActivity();
-
 
         //  Inicializo el NavigationDrawer y la ActionBar
-
         init();
 
     }
@@ -88,6 +84,13 @@ public class MainActivity extends ActionBarActivity {
                 return true;
             case R.id.action_discard:
                 removeMyTable();
+                fragment = tableFragment;
+                FragmentManager fragmentManager =
+                        getSupportFragmentManager();
+
+                fragmentManager.beginTransaction()
+                        .replace(R.id.content_frame, fragment)
+                        .commit();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -128,42 +131,23 @@ public class MainActivity extends ActionBarActivity {
 
                 switch (position) {
                     case 0:
-                        if (!(fragment instanceof TableFragment)) {
-                            fragment = tableFragment;
-
-                            FragmentManager fragmentManager =
-                                    getSupportFragmentManager();
-
-                            fragmentManager.beginTransaction()
-                                    .replace(R.id.content_frame, fragment)
-                                    .commit();
-                        }
+                        fragment = tableFragment;
                         break;
                     case 1:
-                        if (!(fragment instanceof SearchFragment)) {
-                            fragment = searchFragment;
-
-                            FragmentManager fragmentManager =
-                                    getSupportFragmentManager();
-
-                            fragmentManager.beginTransaction()
-                                    .replace(R.id.content_frame, fragment)
-                                    .commit();
-                        }
+                        fragment = searchFragment;
                         break;
                     case 2:
-                        if (!(fragment instanceof ConfigActivity)) {
-                            fragment = configFragment;
-
-                            FragmentManager fragmentManager =
-                                    getSupportFragmentManager();
-
-                            fragmentManager.beginTransaction()
-                                    .replace(R.id.content_frame, fragment)
-                                    .commit();
-                        }
+                        Intent intent = new Intent(view.getContext(), ConfigActivity.class);
+                        startActivity(intent);
                         break;
                 }
+
+                FragmentManager fragmentManager =
+                        getSupportFragmentManager();
+
+                fragmentManager.beginTransaction()
+                        .replace(R.id.content_frame, fragment)
+                        .commit();
 
                 drawerList.setItemChecked(position, true);
 

@@ -1,18 +1,48 @@
 package com.bigomby.compartemesa;
 
+import android.app.Activity;
+import android.content.SharedPreferences;
+import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.EditText;
 import android.view.View;
-import android.view.ViewGroup;
 
-public class ConfigActivity extends Fragment {
+
+public class ConfigActivity extends Activity {
+
+    SharedPreferences pref = null;
 
     @Override
-    public View onCreateView(
-            LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_config);
 
-        return inflater.inflate(R.layout.fragment_config, container, false);
+        EditText nombre = (EditText) findViewById(R.id.username);
+        nombre.setText(loadUserName());
+    }
+
+    /*
+     *  Se uliliza en el Onclick del xml para obtener el nuevo nombre
+    */
+
+    public void saveUserName(View view) {
+        int mode = Activity.MODE_PRIVATE;
+        pref = getSharedPreferences("prefs", mode);
+
+        EditText nombre = (EditText) findViewById(R.id.username);
+        String nuevonombre = nombre.getText().toString();
+
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putString("name", nuevonombre);
+        editor.commit();
+        finish();
+    }
+
+    public String loadUserName() {
+        int mode = Activity.MODE_PRIVATE;
+        pref = getSharedPreferences("prefs", mode);
+        return pref.getString("name", "Usuario");
     }
 }
