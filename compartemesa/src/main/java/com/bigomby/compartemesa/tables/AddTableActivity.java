@@ -3,11 +3,9 @@ package com.bigomby.compartemesa.tables;
 import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.app.Activity;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,15 +14,9 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
 import com.bigomby.compartemesa.ComparteMesaApplication;
-import com.bigomby.compartemesa.MainActivity;
 import com.bigomby.compartemesa.R;
-import com.bigomby.compartemesa.data.Cities;
-import com.bigomby.compartemesa.data.City;
-import com.bigomby.compartemesa.data.Table;
-import com.bigomby.compartemesa.data.User;
-import com.bigomby.compartemesa.data.myTableSQLConfigManager;
+import com.bigomby.compartemesa.communication.CreateTable;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class AddTableActivity extends Activity implements AdapterView.OnItemSelectedListener {
@@ -103,7 +95,7 @@ public class AddTableActivity extends Activity implements AdapterView.OnItemSele
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        addTable();
+                        addTable(((ComparteMesaApplication) getApplication()).getMyUUID());
                         finish();
                     }
                 }
@@ -131,13 +123,8 @@ public class AddTableActivity extends Activity implements AdapterView.OnItemSele
         );
     }
 
-    private void addTable() {
-        myTableSQLConfigManager myTableDb = new myTableSQLConfigManager(this, "myTableDb", null, 1);
-
-        Table newTable = new Table(origin, destiny);
-        newTable.addUser(loadName());
-
-        myTableDb.saveMyTable(newTable);
-
+    private void addTable(String userUUID) {
+        CreateTable createTable = new CreateTable(origin, destiny, userUUID);
+        createTable.execute();
     }
 }

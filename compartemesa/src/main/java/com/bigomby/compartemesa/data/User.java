@@ -1,28 +1,28 @@
 package com.bigomby.compartemesa.data;
 
+import android.util.Log;
+
+import org.ksoap2.serialization.SoapObject;
+
 import java.io.Serializable;
 import java.util.UUID;
 
-/**
- * Created by diego on 14/05/14.
- */
 public class User implements Serializable {
 
+    private static final long serialVersionUID = 24052014;
     private UUID uuid;
+    private String email;
     private String name;
+    private String passwd;
 
-    public User(String uuid, String name) {
-        try {
-            this.uuid = UUID.fromString(uuid);
-        } catch(Exception e) {
-            this.uuid = UUID.randomUUID();
-        }
-        this.name = name;
-    }
+    public User(SoapObject obj) {
 
-    public User(String name) {
-        this.uuid = UUID.randomUUID();
-        this.name = name;
+        this.uuid = UUID.fromString(obj.getPropertyAsString(0));
+        this.email = obj.getPropertyAsString(1);
+        this.name = obj.getPropertyAsString(2);
+        this.passwd = obj.getPropertyAsString(3);
+
+        Log.d("USER", "Creado usuario: " + this.name);
     }
 
     public String getUUID() {
@@ -33,4 +33,15 @@ public class User implements Serializable {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPasswd() {
+        return passwd;
+    }
 }

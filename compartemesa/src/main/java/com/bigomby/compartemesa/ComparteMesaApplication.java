@@ -4,37 +4,48 @@ import android.app.Application;
 
 import com.bigomby.compartemesa.data.Cities;
 import com.bigomby.compartemesa.data.Table;
-import com.bigomby.compartemesa.data.myTableSQLConfigManager;
 
 public class ComparteMesaApplication extends Application {
 
     public static Cities cities;
-    private boolean dbUpdated = true;
-    private Table myTable = null;
+    public String myUUID;
+    public String myName;
+    public String myTableUUID;
+    public Table myTable;
 
     static {
         cities = new Cities();
-    }
-
-    public Table getMyTable() {
-
-        if (dbUpdated) {
-            myTableSQLConfigManager myTableDb = new myTableSQLConfigManager(this, "myTableDb", null, 1);
-            myTable = myTableDb.loadMyTable();
-            dbUpdated = false;
-        }
-        return myTable;
     }
 
     public Cities getCities() {
         return cities;
     }
 
-    public void databaseUpdated() {
-        dbUpdated = true;
+    public void setMyUUID(String myUUID) {
+        this.myUUID = myUUID;
     }
 
-    public boolean isDatabaseUpdate() {
-        return dbUpdated;
+    public String getMyUUID() {
+        return myUUID;
+    }
+
+    public void setMyName(String name) {
+        this.myName = name;
+    }
+
+    public void setMyTableUUID(String tableUUID) {
+        this.myTableUUID = tableUUID;
+    }
+
+    public String getMyTableUUID() {
+        return myTableUUID;
+    }
+
+    public void setMyTable(Table myTable) {
+        this.myTable = myTable;
+    }
+
+    public Table getMyTable() {
+        return myTable;
     }
 }

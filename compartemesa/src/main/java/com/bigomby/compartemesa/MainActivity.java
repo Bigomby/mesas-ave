@@ -1,6 +1,8 @@
 package com.bigomby.compartemesa;
 
+import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -9,13 +11,16 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.bigomby.compartemesa.data.myTableSQLConfigManager;
+import com.bigomby.compartemesa.communication.CreateUser;
+import com.bigomby.compartemesa.communication.LoadMyTable;
 import com.bigomby.compartemesa.search.SearchFragment;
 import com.bigomby.compartemesa.tables.AddTableActivity;
 import com.bigomby.compartemesa.tables.TableFragment;
@@ -32,9 +37,12 @@ public class MainActivity extends ActionBarActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        setContentView(R.layout.activity_main);
+        setProgressBarIndeterminateVisibility(true);
         searchFragment = new SearchFragment();
+        loadPrefs();
 
         //  Inicializo el NavigationDrawer y la ActionBar
         init();
@@ -42,9 +50,26 @@ public class MainActivity extends ActionBarActivity {
     }
 
     /**
-     * ***************************************************************
-     * Función de callback para el NavigationDrawer y la ActionBar    *
-     * ****************************************************************
+     * Carga las preferencias de la aplicación. Si no hay un usuario configurado
+     * pedirá login o registro.
+     */
+    private void loadPrefs() {
+        int mode = Activity.MODE_PRIVATE;
+        SharedPreferences pref = getSharedPreferences("prefs", mode);
+
+        if (pref.contains("userUUID")) {
+            ComparteMesaApplication app = (ComparteMesaApplication) getApplication();
+            app.setMyUUID(pref.getString("userUUID", "null"));
+            app.setMyName(pref.getString("userName", "null"));
+        } else {
+            Log.d("MAIN", "Creando usuario nuevo");
+            CreateUser createUser = new CreateUser();
+            createUser.execute(pref);
+        }
+    }
+
+    /**
+     * Función de callback para el NavigationDrawer y la ActionBar
      */
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
@@ -53,9 +78,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     /**
-     * ***************************************************************
-     * Función de callback para el NavigationDrawer y la ActionBar    *
-     * ****************************************************************
+     * Función de callback para el NavigationDrawer y la ActionBar
      */
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
@@ -64,9 +87,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     /**
-     * ***************************************************************
-     * Función de callback para el NavigationDrawer y la ActionBar    *
-     * ****************************************************************
+     * Función de callback para el NavigationDrawer y la ActionBar
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -83,7 +104,7 @@ public class MainActivity extends ActionBarActivity {
                 startActivity(intent);
                 return true;
             case R.id.action_discard:
-                removeMyTable();
+                deleteTable();
                 fragment = tableFragment;
                 FragmentManager fragmentManager =
                         getSupportFragmentManager();
@@ -98,9 +119,21 @@ public class MainActivity extends ActionBarActivity {
     }
 
     /**
-     * ***************************************************************
-     * Función de callback para el NavigationDrawer y la ActionBar    *
-     * ****************************************************************
+     * Elimina la mesa a la que pertenecemos
+     */
+    private void deleteTable() {
+        int mode = Activity.MODE_PRIVATE;
+        SharedPreferences pref = getSharedPreferences("prefs", mode);
+
+        SharedPreferences.Editor editor = pref.edit();
+        editor.remove("myTableUUID");
+        editor.commit();
+
+        // TODO Eliminar la mesa del servidor
+    }
+
+    /**
+     * Función de callback para el botón añadir cuando no hay mesas
      */
     public void onClick(View view) {
         if (view.getId() == R.id.create_table) {
@@ -110,9 +143,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     /**
-     * ********************************************
-     * Inicializo el NavigatonDrawer y la ActionBar *
-     * **********************************************
+     * Inicializo el NavigatonDrawer y la ActionBar
      */
     private void init() {
         final String[] opcionesMenu = getResources().getStringArray(R.array.navigation_drawer_elements);
@@ -131,7 +162,7 @@ public class MainActivity extends ActionBarActivity {
 
                 switch (position) {
                     case 0:
-                        fragment = tableFragment;
+                        onResume();
                         break;
                     case 1:
                         fragment = searchFragment;
@@ -186,32 +217,15 @@ public class MainActivity extends ActionBarActivity {
         getSupportActionBar().setHomeButtonEnabled(true);
     }
 
+    /**
+     * Cargo el fragmento al inicio de la aplicación o lo recargo si vengo de otra
+     * actividad posterior.
+     */
     @Override
     public void onResume() {
         super.onResume();
 
-        // Actualizo el fragmento
-        ComparteMesaApplication app = (ComparteMesaApplication) getApplication();
-        if (app.isDatabaseUpdate()) {
-            if (fragment == null || fragment instanceof TableFragment) {
-                tableFragment = new TableFragment();
-                fragment = tableFragment;
-            }
-
-            FragmentManager fragmentManager =
-                    getSupportFragmentManager();
-
-            fragmentManager.beginTransaction()
-                    .replace(R.id.content_frame, fragment)
-                    .commit();
-        }
-    }
-
-    private void removeMyTable() {
-
-        myTableSQLConfigManager myTableDb = new myTableSQLConfigManager(this, "myTableDb", null, 1);
-        myTableDb.removeMyTable();
-
-        onResume();
+        LoadMyTable loadMyTable = new LoadMyTable(this, fragment, tableFragment, getSupportFragmentManager());
+        loadMyTable.execute(((ComparteMesaApplication) getApplication()).getMyUUID());
     }
 }

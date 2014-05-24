@@ -1,41 +1,37 @@
 package com.bigomby.compartemesa.data;
 
-import android.content.Context;
 import android.util.Log;
-import android.webkit.WebStorage;
 
-import com.bigomby.compartemesa.ComparteMesaApplication;
+import org.ksoap2.serialization.SoapObject;
 
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
-
+import java.util.Vector;
 
 public class Table implements Serializable {
 
+    private static final long serialVersionUID = 1L;
     private UUID uuid;
     private int destiny;
     private int origin;
-    private Departure departure;
     private List<User> users;
 
-    public Table(int origin, int destiny) {
-        uuid = UUID.randomUUID();
-        users = new ArrayList<User>();
-        this.origin = origin;
-        this.destiny = destiny;
-    }
+    public Table(SoapObject obj) {
 
-    public Table(int origin, int destiny, String uuid) {
-        try {
-            this.uuid = UUID.fromString(uuid);
-        } catch(Exception e) {
-            this.uuid = UUID.randomUUID();
+        this.uuid = UUID.fromString(obj.getPropertyAsString(0).toString());
+        this.origin = Integer.parseInt(obj.getPropertyAsString(1).toString());
+        this.destiny = Integer.parseInt(obj.getPropertyAsString(2).toString());
+
+        users = new LinkedList<User>();
+        Vector<SoapObject> vectorUsers = (Vector) obj.getProperty(3);
+
+        for (int i = 0 ; i < vectorUsers.size() ; i++) {
+            users.add(new User((SoapObject) vectorUsers.get(i)));
         }
-        users = new ArrayList<User>();
-        this.origin = origin;
-        this.destiny = destiny;
+
+        Log.d("TABLE", "Creada mesa con UUID: " + this.uuid.toString());
     }
 
     public String getUUID() {
@@ -54,17 +50,10 @@ public class Table implements Serializable {
         return users;
     }
 
-    public void addUser(String name) {
-        if (users.size() < 4) {
-            User newUser = new User(name);
-            users.add(newUser);
-        }
-    }
-
-    public void addUser(String uuid, String name) {
-        if (users.size() < 4) {
-            User newUser = new User(uuid, name);
-            users.add(newUser);
-        }
+    public void addUser(User user) throws Exception {
+        if (users.size() < 4)
+            users.add(user);
+        else
+            throw new Exception("Error: Mesa llena");
     }
 }

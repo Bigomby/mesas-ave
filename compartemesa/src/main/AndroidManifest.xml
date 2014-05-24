@@ -20,4 +20,6 @@
         <activity android:name="com.bigomby.compartemesa.ConfigActivity" />
     </application>
 
+    <uses-permission android:name="android.permission.INTERNET"></uses-permission>
+
 </manifest>

@@ -1,5 +1,6 @@
 package com.bigomby.compartemesa.data;
 
+/*
 import android.app.Application;
 import android.content.ContentValues;
 import android.content.Context;
@@ -127,3 +128,4 @@ public class myTableSQLConfigManager extends SQLiteOpenHelper {
         return tables;
     }
 }
+*/

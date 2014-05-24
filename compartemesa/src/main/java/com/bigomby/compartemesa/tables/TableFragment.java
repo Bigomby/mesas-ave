@@ -1,10 +1,11 @@
 package com.bigomby.compartemesa.tables;
 
-import android.app.Application;
+import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -12,23 +13,16 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.bigomby.compartemesa.ComparteMesaApplication;
 import com.bigomby.compartemesa.R;
+import com.bigomby.compartemesa.communication.LoadMyTable;
 import com.bigomby.compartemesa.data.Table;
-import com.bigomby.compartemesa.data.User;
-import com.bigomby.compartemesa.data.myTableSQLConfigManager;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 public class TableFragment extends Fragment {
 
@@ -41,14 +35,13 @@ public class TableFragment extends Fragment {
         // Añade a la ActionBar los botones correspondientes al fragmento
         setHasOptionsMenu(true);
 
-        // Obtiene la mesa de la clase Application
-        ComparteMesaApplication app = (ComparteMesaApplication) getActivity().getApplication();
+        Context context = getActivity();
+        ComparteMesaApplication app = (ComparteMesaApplication) context.getApplicationContext();
         Table myTable = app.getMyTable();
 
-        //  Si pertenecemos a una mesa mostramos el layout correspondiente y rellenamos los
-        //  elementos de la interfaz.
         if (myTable != null) {
 
+            Log.d("UI", "Voy a inflar el layout");
             view = inflater.inflate(R.layout.table_fragment, container, false);
 
             int[] userNamesId = {
@@ -72,8 +65,8 @@ public class TableFragment extends Fragment {
                 userName.setText(myTable.getUsers().get(i).getName());
 
                 String uri = "@drawable/ic_action_person";
-                int imageResource = getResources().getIdentifier(uri, null, getActivity().getPackageName());
-                Drawable res = getResources().getDrawable(imageResource);
+                int imageResource = context.getResources().getIdentifier(uri, null, context.getPackageName());
+                Drawable res = context.getResources().getDrawable(imageResource);
 
                 userImage.setImageDrawable(res);
             }
@@ -86,7 +79,7 @@ public class TableFragment extends Fragment {
 
             final ListView msgView = (ListView) view.findViewById(R.id.message_container);
 
-            final ArrayAdapter<String> msgList = new ArrayAdapter<String>(getActivity(),
+            final ArrayAdapter<String> msgList = new ArrayAdapter<String>(context,
                     android.R.layout.simple_list_item_1);
 
             msgView.setAdapter(msgList);
@@ -101,17 +94,12 @@ public class TableFragment extends Fragment {
                     msgList.add(txtEdit.getText().toString());
                     msgView.smoothScrollToPosition(msgList.getCount() - 1);
                     txtEdit.setText("");
-
                 }
             });
-        }
-
-        // En caso de no pertenecer a una mesa mostramos el layout para agregar una mesa
-
-        else {
+        } else {
             view = inflater.inflate(R.layout.table_empty, container, false);
         }
-
+        getActivity().setProgressBarIndeterminateVisibility(false);
         return view;
     }
 
@@ -122,11 +110,14 @@ public class TableFragment extends Fragment {
      */
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        ComparteMesaApplication app = (ComparteMesaApplication) getActivity().getApplication();
+        int mode = Activity.MODE_PRIVATE;
+        SharedPreferences pref = getActivity().getSharedPreferences("prefs", mode);
 
-        if (app.getMyTable() == null)
+        ComparteMesaApplication app = (ComparteMesaApplication) getActivity().getApplication();
+        if (pref.getString("myTableUUID", "null").contentEquals("null")) {
             inflater.inflate(R.menu.main_activity_actions_add, menu);
-        else
+        } else {
             inflater.inflate(R.menu.main_activity_actions_remove, menu);
+        }
     }
 }
