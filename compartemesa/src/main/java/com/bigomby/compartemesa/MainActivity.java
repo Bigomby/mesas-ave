@@ -139,7 +139,7 @@ public class MainActivity extends ActionBarActivity {
         SharedPreferences.Editor editor = pref.edit();
         editor.remove("myTableUUID");
         editor.commit();
-        setSupportProgressBarVisibility(false);
+        setSupportProgressBarIndeterminateVisibility(false);
 
         RemoveMyTableTask removeMyTableTask = new RemoveMyTableTask(new TableOperationCallback() {
 
@@ -154,7 +154,7 @@ public class MainActivity extends ActionBarActivity {
                     ComparteMesaApplication.setMyTable(null);
                 }
 
-                setSupportProgressBarVisibility(false);
+                setSupportProgressBarIndeterminateVisibility(false);
 
             }
         });
@@ -250,7 +250,7 @@ public class MainActivity extends ActionBarActivity {
         LoadTablesTask loadTables = new LoadTablesTask(new TableOperationCallback() {
             @Override
             public void onTaskDone(Object... loadedTables) {
-                setSupportProgressBarVisibility(true);
+                setSupportProgressBarIndeterminateVisibility(false);
 
                 tables = (List<Table>) loadedTables[0];
 
@@ -262,7 +262,7 @@ public class MainActivity extends ActionBarActivity {
                         .commit();
             }
         });
-        setSupportProgressBarVisibility(true);
+        setSupportProgressBarIndeterminateVisibility(true);
         loadTables.execute();
     }
 
@@ -272,7 +272,7 @@ public class MainActivity extends ActionBarActivity {
      */
 
     private void loadFragmentTable() {
-        setSupportProgressBarVisibility(true);
+        setSupportProgressBarIndeterminateVisibility(true);
         LoadMyTableTask loadMyTableTask = new LoadMyTableTask(new TableOperationCallback() {
 
             @Override
@@ -288,7 +288,7 @@ public class MainActivity extends ActionBarActivity {
                         .replace(R.id.content_frame, new TableFragment())
                         .commit();
 
-                setSupportProgressBarVisibility(false);
+                setSupportProgressBarIndeterminateVisibility(false);
 
             }
         });
