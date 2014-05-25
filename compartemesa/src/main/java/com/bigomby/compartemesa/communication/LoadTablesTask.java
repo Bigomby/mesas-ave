@@ -6,13 +6,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListAdapter;
-import android.widget.ListView;
 
 import com.bigomby.compartemesa.ComparteMesaApplication;
-import com.bigomby.compartemesa.R;
 import com.bigomby.compartemesa.data.Table;
 import com.bigomby.compartemesa.interfaces.TableOperationCallback;
 
@@ -22,7 +17,6 @@ import org.ksoap2.serialization.SoapSerializationEnvelope;
 import org.ksoap2.transport.HttpTransportSE;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 

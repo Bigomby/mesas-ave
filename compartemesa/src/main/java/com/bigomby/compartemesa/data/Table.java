@@ -1,7 +1,5 @@
 package com.bigomby.compartemesa.data;
 
-import android.util.Log;
-
 import org.ksoap2.serialization.SoapObject;
 
 import java.io.Serializable;

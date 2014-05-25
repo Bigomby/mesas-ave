@@ -1,12 +1,9 @@
 package com.bigomby.compartemesa.communication;
 
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
 
 import com.bigomby.compartemesa.ComparteMesaApplication;
-import com.bigomby.compartemesa.data.Table;
-import com.bigomby.compartemesa.data.User;
 import com.bigomby.compartemesa.interfaces.TableOperationCallback;
 
 import org.ksoap2.SoapEnvelope;
