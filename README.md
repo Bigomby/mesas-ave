@@ -171,70 +171,59 @@ Hemos usado un DrawerNavigation por lo que necesitamos algunos métodos para ini
      * Inicializo el NavigatonDrawer y la ActionBar
      */
     private void init() {
-        final String[] opcionesMenu = getResources().getStringArray(R.array.navigation_drawer_elements);
-        final DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        final ListView drawerList = (ListView) findViewById(R.id.left_drawer);
-        final CharSequence tituloApp = getTitle();
-
-        drawerList.setAdapter(new ArrayAdapter<String>(
-                getSupportActionBar().getThemedContext(),
-                android.R.layout.simple_list_item_1, opcionesMenu));
-
-        drawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView parent, View view,
-                                    int position, long id) {
-
-                switch (position) {
-                    case 0:
-                        loadFragmentTable();
-                        break;
-                    case 1:
-                        loadSearch();
-                        break;
-                    case 2:
-                        configActivity();
-                        break;
+            final String[] opcionesMenu = getResources().getStringArray(R.array.navigation_drawer_elements);
+            final DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+            final ListView drawerList = (ListView) findViewById(R.id.left_drawer);
+    
+            drawerList.setAdapter(new ArrayAdapter<String>(
+                    getSupportActionBar().getThemedContext(),
+                    android.R.layout.simple_list_item_1, opcionesMenu));
+    
+            drawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView parent, View view,
+                                        int position, long id) {
+    
+                    switch (position) {
+                        case 0:
+                            loadFragmentTable();
+                            break;
+                        case 1:
+                            loadSearch();
+                            break;
+                        case 2:
+                            configActivity();
+                            break;
+                    }
+    
+                    drawerList.setItemChecked(position, true);
+                    drawerLayout.closeDrawer(drawerList);
                 }
-
-                drawerList.setItemChecked(position, true);
-
-                if (position != 0) {
-                    tituloSeccion = opcionesMenu[position];
+    
+            });
+    
+            drawerToggle = new ActionBarDrawerToggle(this,
+                    drawerLayout,
+                    R.drawable.ic_navigation_drawer,
+                    R.string.drawer_open,
+                    R.string.drawer_close) {
+    
+                public void onDrawerClosed(View view) {
                     getSupportActionBar().setTitle(tituloSeccion);
-                } else {
-                    tituloSeccion = (String) getTitle();
+                    ActivityCompat.invalidateOptionsMenu(MainActivity.this);
                 }
-
-                drawerLayout.closeDrawer(drawerList);
-            }
-
-        });
-
-        drawerToggle = new
-
-                ActionBarDrawerToggle(this,
-                        drawerLayout,
-                        R.drawable.ic_navigation_drawer,
-                        R.string.drawer_open,
-                        R.string.drawer_close) {
-
-                    public void onDrawerClosed(View view) {
-                        getSupportActionBar().setTitle(tituloSeccion);
-                        ActivityCompat.invalidateOptionsMenu(MainActivity.this);
-                    }
-
-                    public void onDrawerOpened(View drawerView) {
-                        getSupportActionBar().setTitle(tituloApp);
-                        ActivityCompat.invalidateOptionsMenu(MainActivity.this);
-                    }
-                };
-
-        drawerLayout.setDrawerListener(drawerToggle);
-
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
-    }
+    
+                public void onDrawerOpened(View drawerView) {
+                    getSupportActionBar().setTitle(getTitle());
+                    ActivityCompat.invalidateOptionsMenu(MainActivity.this);
+                }
+            };
+    
+            drawerLayout.setDrawerListener(drawerToggle);
+    
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
+        }
 ```
 
 ```java
@@ -292,12 +281,12 @@ Aquí llamamos a la actividad `ConfigActivity`.
 Cargamos las mesas en el servidor y llamamos al fragmento `SearchFragment` para que nos las muestre en una lista.
 
 ```java
-private void loadSearch() {
+    private void loadSearch() {
 
         LoadTablesTask loadTables = new LoadTablesTask(new TableOperationCallback() {
             @Override
             public void onTaskDone(Object... loadedTables) {
-                setSupportProgressBarIndeterminateVisibility(false);
+
 
                 tables = (List<Table>) loadedTables[0];
 
@@ -307,6 +296,10 @@ private void loadSearch() {
                 fragmentManager.beginTransaction()
                         .replace(R.id.content_frame, new SearchFragment())
                         .commit();
+
+                tituloSeccion = "Lista de mesas";
+                getSupportActionBar().setTitle(tituloSeccion);
+                setSupportProgressBarIndeterminateVisibility(false);
             }
         });
         setSupportProgressBarIndeterminateVisibility(true);
@@ -319,29 +312,32 @@ private void loadSearch() {
 Descargamos del servidor los datos de la mesa a la que pertenecemos, en caso de pertenecer a alguna, y tras cargar los datos mostramos el fragmento para que nos los muestre.
 
 ```java
-	private void loadFragmentTable() {
-        setSupportProgressBarIndeterminateVisibility(true);
-        LoadMyTableTask loadMyTableTask = new LoadMyTableTask(new TableOperationCallback() {
-
-            @Override
-            public void onTaskDone(Object... object) {
-
-                Table myTable = (Table) object[0];
-
-                if (myTable != null)
-                    ComparteMesaApplication.setMyTable(myTable);
-
-                FragmentManager fragmentManager = getSupportFragmentManager();
-                fragmentManager.beginTransaction()
-                        .replace(R.id.content_frame, new TableFragment())
-                        .commit();
-
-                setSupportProgressBarIndeterminateVisibility(false);
-
-            }
-        });
-        loadMyTableTask.execute();
-    }
+	    private void loadFragmentTable() {
+            setSupportProgressBarIndeterminateVisibility(true);
+    
+            LoadMyTableTask loadMyTableTask = new LoadMyTableTask(new TableOperationCallback() {
+    
+                @Override
+                public void onTaskDone(Object... object) {
+    
+                    Table myTable = (Table) object[0];
+    
+                    if (myTable != null)
+                        ComparteMesaApplication.setMyTable(myTable);
+    
+                    FragmentManager fragmentManager = getSupportFragmentManager();
+                    fragmentManager.beginTransaction()
+                            .replace(R.id.content_frame, new TableFragment())
+                            .commit();
+    
+                    tituloSeccion = getTitle();
+                    getSupportActionBar().setTitle(tituloSeccion);
+                    setSupportProgressBarIndeterminateVisibility(false);
+    
+                }
+            });
+            loadMyTableTask.execute();
+        }
 ```
 
 #### onResume() y onPause()
