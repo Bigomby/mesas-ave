@@ -29,9 +29,9 @@ import java.util.Vector;
 public class LoadTablesTask extends AsyncTask<Void, Void, List<Table>> {
 
     private String METHOD_NAME = "getTables";
-    private String NAMESPACE = "http://192.168.2.188";
+    private String NAMESPACE = ComparteMesaApplication.NAMESPACE;
     private String SOAP_ACTION = NAMESPACE + METHOD_NAME;
-    private static final String URL = "http://192.168.2.188:8080/axis/services/mesas-ave";
+    private static final String URL = ComparteMesaApplication.URL;
 
     List<Table> tables;
     private View view;

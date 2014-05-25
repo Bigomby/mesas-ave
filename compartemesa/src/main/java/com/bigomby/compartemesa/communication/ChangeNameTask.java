@@ -13,9 +13,9 @@ import org.ksoap2.transport.HttpTransportSE;
 public class ChangeNameTask extends AsyncTask<String, Void, Void> {
 
     private String METHOD_NAME = "changeName";
-    private String NAMESPACE = "http://192.168.2.188";
+    private String NAMESPACE = ComparteMesaApplication.NAMESPACE;
     private String SOAP_ACTION = NAMESPACE + METHOD_NAME;
-    private static final String URL = "http://192.168.2.188:8080/axis/services/mesas-ave";
+    private static final String URL = ComparteMesaApplication.URL;
 
     @Override
     protected Void doInBackground(String... name) {

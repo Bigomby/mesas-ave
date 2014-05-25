@@ -3,6 +3,8 @@ package com.bigomby.compartemesa.communication;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.bigomby.compartemesa.ComparteMesaApplication;
+
 import org.ksoap2.SoapEnvelope;
 import org.ksoap2.serialization.SoapObject;
 import org.ksoap2.serialization.SoapSerializationEnvelope;
@@ -11,9 +13,9 @@ import org.ksoap2.transport.HttpTransportSE;
 public class CreateTable extends AsyncTask<Void, Void, Void> {
 
     private String METHOD_NAME = "createTable";
-    private String NAMESPACE = "http://192.168.2.188";
+    private String NAMESPACE = ComparteMesaApplication.NAMESPACE;
     private String SOAP_ACTION = NAMESPACE + METHOD_NAME;
-    private static final String URL = "http://192.168.2.188:8080/axis/services/mesas-ave";
+    private static final String URL = ComparteMesaApplication.URL;
 
     private int origin;
     private int destiny;
