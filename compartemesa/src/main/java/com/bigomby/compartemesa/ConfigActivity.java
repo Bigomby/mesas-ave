@@ -2,17 +2,15 @@ package com.bigomby.compartemesa;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.widget.EditText;
+import android.support.v7.app.ActionBarActivity;
 import android.view.View;
+import android.widget.EditText;
 
 import com.bigomby.compartemesa.communication.ChangeNameTask;
 
 
-public class ConfigActivity extends Activity {
+public class ConfigActivity extends ActionBarActivity {
 
     SharedPreferences pref = null;
 
@@ -20,7 +18,7 @@ public class ConfigActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_config);
-
+        getSupportActionBar().setTitle("Configuración");
         EditText nombre = (EditText) findViewById(R.id.username);
         nombre.setText(loadUserName());
     }

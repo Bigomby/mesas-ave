@@ -33,7 +33,7 @@ import java.util.List;
 
 public class MainActivity extends ActionBarActivity {
 
-    private String tituloSeccion;
+    private CharSequence tituloSeccion;
     private ActionBarDrawerToggle drawerToggle;
     public List<Table> tables;
 
@@ -178,7 +178,6 @@ public class MainActivity extends ActionBarActivity {
         final String[] opcionesMenu = getResources().getStringArray(R.array.navigation_drawer_elements);
         final DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         final ListView drawerList = (ListView) findViewById(R.id.left_drawer);
-        final CharSequence tituloApp = getTitle();
 
         drawerList.setAdapter(new ArrayAdapter<String>(
                 getSupportActionBar().getThemedContext(),
@@ -202,37 +201,27 @@ public class MainActivity extends ActionBarActivity {
                 }
 
                 drawerList.setItemChecked(position, true);
-
-                if (position != 0) {
-                    tituloSeccion = opcionesMenu[position];
-                    getSupportActionBar().setTitle(tituloSeccion);
-                } else {
-                    tituloSeccion = (String) getTitle();
-                }
-
                 drawerLayout.closeDrawer(drawerList);
             }
 
         });
 
-        drawerToggle = new
+        drawerToggle = new ActionBarDrawerToggle(this,
+                drawerLayout,
+                R.drawable.ic_navigation_drawer,
+                R.string.drawer_open,
+                R.string.drawer_close) {
 
-                ActionBarDrawerToggle(this,
-                        drawerLayout,
-                        R.drawable.ic_navigation_drawer,
-                        R.string.drawer_open,
-                        R.string.drawer_close) {
+            public void onDrawerClosed(View view) {
+                getSupportActionBar().setTitle(tituloSeccion);
+                ActivityCompat.invalidateOptionsMenu(MainActivity.this);
+            }
 
-                    public void onDrawerClosed(View view) {
-                        getSupportActionBar().setTitle(tituloSeccion);
-                        ActivityCompat.invalidateOptionsMenu(MainActivity.this);
-                    }
-
-                    public void onDrawerOpened(View drawerView) {
-                        getSupportActionBar().setTitle(tituloApp);
-                        ActivityCompat.invalidateOptionsMenu(MainActivity.this);
-                    }
-                };
+            public void onDrawerOpened(View drawerView) {
+                getSupportActionBar().setTitle(getTitle());
+                ActivityCompat.invalidateOptionsMenu(MainActivity.this);
+            }
+        };
 
         drawerLayout.setDrawerListener(drawerToggle);
 
@@ -250,7 +239,7 @@ public class MainActivity extends ActionBarActivity {
         LoadTablesTask loadTables = new LoadTablesTask(new TableOperationCallback() {
             @Override
             public void onTaskDone(Object... loadedTables) {
-                setSupportProgressBarIndeterminateVisibility(false);
+
 
                 tables = (List<Table>) loadedTables[0];
 
@@ -260,6 +249,10 @@ public class MainActivity extends ActionBarActivity {
                 fragmentManager.beginTransaction()
                         .replace(R.id.content_frame, new SearchFragment())
                         .commit();
+
+                tituloSeccion = "Lista de mesas";
+                getSupportActionBar().setTitle(tituloSeccion);
+                setSupportProgressBarIndeterminateVisibility(false);
             }
         });
         setSupportProgressBarIndeterminateVisibility(true);
@@ -273,6 +266,7 @@ public class MainActivity extends ActionBarActivity {
 
     private void loadFragmentTable() {
         setSupportProgressBarIndeterminateVisibility(true);
+
         LoadMyTableTask loadMyTableTask = new LoadMyTableTask(new TableOperationCallback() {
 
             @Override
@@ -288,6 +282,8 @@ public class MainActivity extends ActionBarActivity {
                         .replace(R.id.content_frame, new TableFragment())
                         .commit();
 
+                tituloSeccion = getTitle();
+                getSupportActionBar().setTitle(tituloSeccion);
                 setSupportProgressBarIndeterminateVisibility(false);
 
             }
