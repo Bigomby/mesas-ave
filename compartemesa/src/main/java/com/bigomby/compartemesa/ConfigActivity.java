@@ -9,6 +9,8 @@ import android.view.MenuItem;
 import android.widget.EditText;
 import android.view.View;
 
+import com.bigomby.compartemesa.communication.ChangeNameTask;
+
 
 public class ConfigActivity extends Activity {
 
@@ -34,8 +36,11 @@ public class ConfigActivity extends Activity {
         EditText nombre = (EditText) findViewById(R.id.username);
         String nuevonombre = nombre.getText().toString();
 
+        ChangeNameTask changeNameTask = new ChangeNameTask();
+        changeNameTask.execute(nuevonombre);
+
         SharedPreferences.Editor editor = pref.edit();
-        editor.putString("name", nuevonombre);
+        editor.putString("myName", nuevonombre);
         editor.commit();
         finish();
     }
@@ -43,6 +48,6 @@ public class ConfigActivity extends Activity {
     public String loadUserName() {
         int mode = Activity.MODE_PRIVATE;
         pref = getSharedPreferences("prefs", mode);
-        return pref.getString("name", "Usuario");
+        return pref.getString("myName", "Usuario");
     }
 }

@@ -8,44 +8,30 @@ import com.bigomby.compartemesa.data.Table;
 public class ComparteMesaApplication extends Application {
 
     public static Cities cities;
-    public String myUUID;
-    public String myName;
-    public String myTableUUID;
-    public Table myTable;
+    public static String myUUID;
+    public static Table myTable;
 
     static {
         cities = new Cities();
     }
 
-    public Cities getCities() {
+    public static Cities getCities() {
         return cities;
     }
 
-    public void setMyUUID(String myUUID) {
-        this.myUUID = myUUID;
+    public static void setMyUUID(String newMyUUID) {
+        myUUID = newMyUUID;
     }
 
-    public String getMyUUID() {
+    public static String getMyUUID() {
         return myUUID;
     }
 
-    public void setMyName(String name) {
-        this.myName = name;
+    public static void setMyTable(Table myNewTable) {
+        myTable = myNewTable;
     }
 
-    public void setMyTableUUID(String tableUUID) {
-        this.myTableUUID = tableUUID;
-    }
-
-    public String getMyTableUUID() {
-        return myTableUUID;
-    }
-
-    public void setMyTable(Table myTable) {
-        this.myTable = myTable;
-    }
-
-    public Table getMyTable() {
+    public static Table getMyTable() {
         return myTable;
     }
 }

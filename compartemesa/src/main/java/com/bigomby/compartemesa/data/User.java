@@ -16,13 +16,10 @@ public class User implements Serializable {
     private String passwd;
 
     public User(SoapObject obj) {
-
         this.uuid = UUID.fromString(obj.getPropertyAsString(0));
         this.email = obj.getPropertyAsString(1);
         this.name = obj.getPropertyAsString(2);
         this.passwd = obj.getPropertyAsString(3);
-
-        Log.d("USER", "Creado usuario: " + this.name);
     }
 
     public String getUUID() {

@@ -21,7 +21,6 @@ import android.widget.TextView;
 
 import com.bigomby.compartemesa.ComparteMesaApplication;
 import com.bigomby.compartemesa.R;
-import com.bigomby.compartemesa.communication.LoadMyTable;
 import com.bigomby.compartemesa.data.Table;
 
 public class TableFragment extends Fragment {
@@ -36,12 +35,10 @@ public class TableFragment extends Fragment {
         setHasOptionsMenu(true);
 
         Context context = getActivity();
-        ComparteMesaApplication app = (ComparteMesaApplication) context.getApplicationContext();
-        Table myTable = app.getMyTable();
+        Table myTable = ComparteMesaApplication.getMyTable();
 
-        if (myTable != null) {
+        if (myTable != null && !myTable.getUUID().contentEquals("0")) {
 
-            Log.d("UI", "Voy a inflar el layout");
             view = inflater.inflate(R.layout.table_fragment, container, false);
 
             int[] userNamesId = {
@@ -51,16 +48,16 @@ public class TableFragment extends Fragment {
                     R.id.user_4_name
             };
 
-            int[] userImagesId = {
+            /*int[] userImagesId = {
                     R.id.user_1_image,
                     R.id.user_2_image,
                     R.id.user_3_image,
                     R.id.user_4_image
-            };
+            };*/
 
             for (int i = 0; i < myTable.getUsers().size(); i++) {
                 TextView userName = (TextView) view.findViewById(userNamesId[i]);
-                ImageView userImage = (ImageView) view.findViewById(userImagesId[i]);
+                //ImageView userImage = (ImageView) view.findViewById(userImagesId[i]);
 
                 userName.setText(myTable.getUsers().get(i).getName());
 
@@ -68,7 +65,7 @@ public class TableFragment extends Fragment {
                 int imageResource = context.getResources().getIdentifier(uri, null, context.getPackageName());
                 Drawable res = context.getResources().getDrawable(imageResource);
 
-                userImage.setImageDrawable(res);
+                //userImage.setImageDrawable(res);
             }
 
             final TextView originCity = (TextView) view.findViewById(R.id.city_origin);
@@ -96,8 +93,10 @@ public class TableFragment extends Fragment {
                     txtEdit.setText("");
                 }
             });
-        } else {
+        } else if (myTable != null) {
             view = inflater.inflate(R.layout.table_empty, container, false);
+        } else {
+            view = inflater.inflate(R.layout.table_error, container, false);
         }
         getActivity().setProgressBarIndeterminateVisibility(false);
         return view;
@@ -110,14 +109,20 @@ public class TableFragment extends Fragment {
      */
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        int mode = Activity.MODE_PRIVATE;
-        SharedPreferences pref = getActivity().getSharedPreferences("prefs", mode);
 
-        ComparteMesaApplication app = (ComparteMesaApplication) getActivity().getApplication();
-        if (pref.getString("myTableUUID", "null").contentEquals("null")) {
+        Table myTable = ComparteMesaApplication.getMyTable();
+
+        // Si no pertenezco a ninguna mesa añado el botón "Añadir mesa"
+        if (myTable != null && myTable.getUUID().contentEquals("0")) {
             inflater.inflate(R.menu.main_activity_actions_add, menu);
-        } else {
-            inflater.inflate(R.menu.main_activity_actions_remove, menu);
+        }
+        // En caso contrario, añado el botón eliminar mesa si soy admin o
+        // abandonar mesa en caso contrario.
+        else if (ComparteMesaApplication.getMyTable() != null) {
+            if (myTable.getAdminUUID().contentEquals(ComparteMesaApplication.getMyUUID()))
+                inflater.inflate(R.menu.main_activity_actions_remove, menu);
+            else
+                inflater.inflate(R.menu.main_activity_actions_leave, menu);
         }
     }
 }

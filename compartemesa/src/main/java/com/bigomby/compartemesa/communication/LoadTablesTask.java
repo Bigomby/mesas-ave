@@ -14,6 +14,7 @@ import android.widget.ListView;
 import com.bigomby.compartemesa.ComparteMesaApplication;
 import com.bigomby.compartemesa.R;
 import com.bigomby.compartemesa.data.Table;
+import com.bigomby.compartemesa.interfaces.TableOperationCallback;
 
 import org.ksoap2.SoapEnvelope;
 import org.ksoap2.serialization.SoapObject;
@@ -23,8 +24,9 @@ import org.ksoap2.transport.HttpTransportSE;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Vector;
 
-public class LoadTables extends AsyncTask<Void, Void, List<Table>> {
+public class LoadTablesTask extends AsyncTask<Void, Void, List<Table>> {
 
     private String METHOD_NAME = "getTables";
     private String NAMESPACE = "http://192.168.2.188";
@@ -37,11 +39,10 @@ public class LoadTables extends AsyncTask<Void, Void, List<Table>> {
     private ViewGroup container;
     private Context context;
 
-    public LoadTables(View view, LayoutInflater inflater, ViewGroup container, Context context) {
-        this.view = view;
-        this.inflater = inflater;
-        this.container = container;
-        this.context = context;
+    TableOperationCallback tableOperationCallback;
+
+    public LoadTablesTask(TableOperationCallback tableOperationCallback) {
+        this.tableOperationCallback = tableOperationCallback;
     }
 
     @Override
@@ -56,14 +57,13 @@ public class LoadTables extends AsyncTask<Void, Void, List<Table>> {
             envelope.setOutputSoapObject(request);
             HttpTransportSE androidHttpTransport = new HttpTransportSE(URL);
             androidHttpTransport.call(SOAP_ACTION, envelope);
-            Object[] result = (Object[]) envelope.getResponse();
 
-            for (int i = 0; i < result.length; i++) {
-                Log.d("AXI", "Descargada mesa: " + ((Table) result[i]).getUUID());
-                tables.add((Table) result[i]);
+            Vector vector = (Vector) envelope.getResponse();
+
+            for (int i = 0 ; i < vector.size() ; i++) {
+                tables.add(new Table((SoapObject) vector.get(i)));
             }
 
-            Log.d("AXIS", "Result:" + result.toString());
         } catch (Exception E) {
             E.printStackTrace();
         }
@@ -73,34 +73,6 @@ public class LoadTables extends AsyncTask<Void, Void, List<Table>> {
 
     @Override
     protected void onPostExecute(List<Table> tables) {
-
-        View view = inflater.inflate(R.layout.fragment_search, container, false);
-
-        if (tables != null && !tables.isEmpty()) {
-            List<String> titles = new ArrayList<String>();
-
-            Iterator<Table> it = tables.iterator();
-
-            while (it.hasNext()) {
-                Table table = it.next();
-                String originName = ComparteMesaApplication.cities.getCityName(table.getOrigin());
-                String destinyName = ComparteMesaApplication.cities.getCityName(table.getDestiny());
-                titles.add(originName + " --> " + destinyName);
-            }
-
-            ListAdapter adapter = new ArrayAdapter<String>(context,
-                    android.R.layout.simple_list_item_1, titles);
-
-            ListView lv = (ListView) view.findViewById(R.id.tablesList);
-            lv.setAdapter(adapter);
-
-            lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
-                    // TODO
-                }
-            });
-
-        }
+        tableOperationCallback.onTaskDone(tables);
     }
 }
