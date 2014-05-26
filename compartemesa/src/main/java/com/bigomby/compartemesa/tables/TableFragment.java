@@ -1,34 +1,23 @@
 package com.bigomby.compartemesa.tables;
 
-import android.app.Application;
+import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.widget.SimpleCursorAdapter;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.bigomby.compartemesa.ComparteMesaApplication;
 import com.bigomby.compartemesa.R;
 import com.bigomby.compartemesa.data.Table;
-import com.bigomby.compartemesa.data.User;
-import com.bigomby.compartemesa.data.myTableSQLConfigManager;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 public class TableFragment extends Fragment {
 
@@ -41,13 +30,10 @@ public class TableFragment extends Fragment {
         // Añade a la ActionBar los botones correspondientes al fragmento
         setHasOptionsMenu(true);
 
-        // Obtiene la mesa de la clase Application
-        ComparteMesaApplication app = (ComparteMesaApplication) getActivity().getApplication();
-        Table myTable = app.getMyTable();
+        Context context = getActivity();
+        Table myTable = ComparteMesaApplication.getMyTable();
 
-        //  Si pertenecemos a una mesa mostramos el layout correspondiente y rellenamos los
-        //  elementos de la interfaz.
-        if (myTable != null) {
+        if (myTable != null && !myTable.getUUID().contentEquals("0")) {
 
             view = inflater.inflate(R.layout.table_fragment, container, false);
 
@@ -58,24 +44,24 @@ public class TableFragment extends Fragment {
                     R.id.user_4_name
             };
 
-            int[] userImagesId = {
+            /*int[] userImagesId = {
                     R.id.user_1_image,
                     R.id.user_2_image,
                     R.id.user_3_image,
                     R.id.user_4_image
-            };
+            };*/
 
             for (int i = 0; i < myTable.getUsers().size(); i++) {
                 TextView userName = (TextView) view.findViewById(userNamesId[i]);
-                ImageView userImage = (ImageView) view.findViewById(userImagesId[i]);
+                //ImageView userImage = (ImageView) view.findViewById(userImagesId[i]);
 
                 userName.setText(myTable.getUsers().get(i).getName());
 
                 String uri = "@drawable/ic_action_person";
-                int imageResource = getResources().getIdentifier(uri, null, getActivity().getPackageName());
-                Drawable res = getResources().getDrawable(imageResource);
+                int imageResource = context.getResources().getIdentifier(uri, null, context.getPackageName());
+                Drawable res = context.getResources().getDrawable(imageResource);
 
-                userImage.setImageDrawable(res);
+                //userImage.setImageDrawable(res);
             }
 
             final TextView originCity = (TextView) view.findViewById(R.id.city_origin);
@@ -86,7 +72,7 @@ public class TableFragment extends Fragment {
 
             final ListView msgView = (ListView) view.findViewById(R.id.message_container);
 
-            final ArrayAdapter<String> msgList = new ArrayAdapter<String>(getActivity(),
+            final ArrayAdapter<String> msgList = new ArrayAdapter<String>(context,
                     android.R.layout.simple_list_item_1);
 
             msgView.setAdapter(msgList);
@@ -101,17 +87,14 @@ public class TableFragment extends Fragment {
                     msgList.add(txtEdit.getText().toString());
                     msgView.smoothScrollToPosition(msgList.getCount() - 1);
                     txtEdit.setText("");
-
                 }
             });
-        }
-
-        // En caso de no pertenecer a una mesa mostramos el layout para agregar una mesa
-
-        else {
+        } else if (myTable != null) {
             view = inflater.inflate(R.layout.table_empty, container, false);
+        } else {
+            view = inflater.inflate(R.layout.table_error, container, false);
         }
-
+        getActivity().setProgressBarIndeterminateVisibility(false);
         return view;
     }
 
@@ -122,11 +105,20 @@ public class TableFragment extends Fragment {
      */
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        ComparteMesaApplication app = (ComparteMesaApplication) getActivity().getApplication();
 
-        if (app.getMyTable() == null)
+        Table myTable = ComparteMesaApplication.getMyTable();
+
+        // Si no pertenezco a ninguna mesa añado el botón "Añadir mesa"
+        if (myTable != null && myTable.getUUID().contentEquals("0")) {
             inflater.inflate(R.menu.main_activity_actions_add, menu);
-        else
-            inflater.inflate(R.menu.main_activity_actions_remove, menu);
+        }
+        // En caso contrario, añado el botón eliminar mesa si soy admin o
+        // abandonar mesa en caso contrario.
+        else if (ComparteMesaApplication.getMyTable() != null) {
+            if (myTable.getAdminUUID().contentEquals(ComparteMesaApplication.getMyUUID()))
+                inflater.inflate(R.menu.main_activity_actions_remove, menu);
+            else
+                inflater.inflate(R.menu.main_activity_actions_leave, menu);
+        }
     }
 }

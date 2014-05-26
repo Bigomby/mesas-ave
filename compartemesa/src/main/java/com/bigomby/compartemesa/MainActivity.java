@@ -1,50 +1,90 @@
 package com.bigomby.compartemesa;
 
+import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.bigomby.compartemesa.data.myTableSQLConfigManager;
+import com.bigomby.compartemesa.communication.ChangeNameTask;
+import com.bigomby.compartemesa.communication.CreateUser;
+import com.bigomby.compartemesa.communication.LoadMyTableTask;
+import com.bigomby.compartemesa.communication.LoadTablesTask;
+import com.bigomby.compartemesa.communication.RemoveMyTableTask;
+import com.bigomby.compartemesa.data.Table;
+import com.bigomby.compartemesa.interfaces.TableOperationCallback;
 import com.bigomby.compartemesa.search.SearchFragment;
 import com.bigomby.compartemesa.tables.AddTableActivity;
 import com.bigomby.compartemesa.tables.TableFragment;
 
+import java.util.List;
+
 public class MainActivity extends ActionBarActivity {
 
-    private String tituloSeccion;
+    private CharSequence tituloSeccion;
     private ActionBarDrawerToggle drawerToggle;
-    private Fragment fragment = null;
-    private Fragment tableFragment;
-    private Fragment searchFragment;
+    public List<Table> tables;
 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        supportRequestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.activity_main);
 
-        searchFragment = new SearchFragment();
+        // Cargo las preferencias
+        loadPrefs();
 
-        //  Inicializo el NavigationDrawer y la ActionBar
+        // Inicializo el NavigationDrawer y la ActionBar
         init();
 
     }
 
     /**
-     * ***************************************************************
-     * Función de callback para el NavigationDrawer y la ActionBar    *
-     * ****************************************************************
+     * Carga las preferencias de la aplicación. Si no hay un usuario configurado
+     * pedirá login o registro.
+     */
+    private void loadPrefs() {
+        int mode = Activity.MODE_PRIVATE;
+        final SharedPreferences pref = getSharedPreferences("prefs", mode);
+        String myUUID = pref.getString("myUUID", "null");
+        String myName = pref.getString("myName", "Usuario");
+
+        Log.d("PREFS", "Cargada UUID: " + myUUID);
+
+        // Cargo el UUID almacenado, si no hay ninguno pido uno nuevo al servidor
+
+        if (myUUID.contentEquals("null")) {
+            CreateUser createUser = new CreateUser(new TableOperationCallback() {
+                @Override
+                public void onTaskDone(Object... params) {
+                    String myName = pref.getString("myName", "User");
+
+                    ChangeNameTask changeNameTask = new ChangeNameTask();
+                    changeNameTask.execute(myName);
+                }
+            });
+            createUser.execute(myName);
+        } else {
+            ComparteMesaApplication.setMyUUID(myUUID);
+            Log.d("MAIN", "Iniciada aplicación con UUID: " + ComparteMesaApplication.getMyUUID());
+        }
+    }
+
+    /**
+     * Función de callback para el NavigationDrawer y la ActionBar
      */
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
@@ -53,9 +93,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     /**
-     * ***************************************************************
-     * Función de callback para el NavigationDrawer y la ActionBar    *
-     * ****************************************************************
+     * Función de callback para el NavigationDrawer y la ActionBar
      */
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
@@ -64,9 +102,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     /**
-     * ***************************************************************
-     * Función de callback para el NavigationDrawer y la ActionBar    *
-     * ****************************************************************
+     * Función de callback para el NavigationDrawer y la ActionBar
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -83,14 +119,8 @@ public class MainActivity extends ActionBarActivity {
                 startActivity(intent);
                 return true;
             case R.id.action_discard:
-                removeMyTable();
-                fragment = tableFragment;
-                FragmentManager fragmentManager =
-                        getSupportFragmentManager();
-
-                fragmentManager.beginTransaction()
-                        .replace(R.id.content_frame, fragment)
-                        .commit();
+                deleteTable();
+                onResume();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -98,9 +128,41 @@ public class MainActivity extends ActionBarActivity {
     }
 
     /**
-     * ***************************************************************
-     * Función de callback para el NavigationDrawer y la ActionBar    *
-     * ****************************************************************
+     * Elimina la mesa a la que pertenecemos
+     */
+    private void deleteTable() {
+
+
+        int mode = Activity.MODE_PRIVATE;
+        SharedPreferences pref = getSharedPreferences("prefs", mode);
+
+        SharedPreferences.Editor editor = pref.edit();
+        editor.remove("myTableUUID");
+        editor.commit();
+        setSupportProgressBarIndeterminateVisibility(false);
+
+        RemoveMyTableTask removeMyTableTask = new RemoveMyTableTask(new TableOperationCallback() {
+
+            @Override
+            public void onTaskDone(Object... object) {
+
+                Integer error = (Integer) object[0];
+
+                if (error != null && error == 0) {
+                    ComparteMesaApplication.setMyTable(new Table());
+                } else {
+                    ComparteMesaApplication.setMyTable(null);
+                }
+
+                setSupportProgressBarIndeterminateVisibility(false);
+
+            }
+        });
+        removeMyTableTask.execute();
+    }
+
+    /**
+     * Función de callback para el botón añadir cuando no hay mesas
      */
     public void onClick(View view) {
         if (view.getId() == R.id.create_table) {
@@ -110,15 +172,12 @@ public class MainActivity extends ActionBarActivity {
     }
 
     /**
-     * ********************************************
-     * Inicializo el NavigatonDrawer y la ActionBar *
-     * **********************************************
+     * Inicializo el NavigatonDrawer y la ActionBar
      */
     private void init() {
         final String[] opcionesMenu = getResources().getStringArray(R.array.navigation_drawer_elements);
         final DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         final ListView drawerList = (ListView) findViewById(R.id.left_drawer);
-        final CharSequence tituloApp = getTitle();
 
         drawerList.setAdapter(new ArrayAdapter<String>(
                 getSupportActionBar().getThemedContext(),
@@ -131,36 +190,20 @@ public class MainActivity extends ActionBarActivity {
 
                 switch (position) {
                     case 0:
-                        fragment = tableFragment;
+                        loadFragmentTable();
                         break;
                     case 1:
-                        fragment = searchFragment;
+                        loadSearch();
                         break;
                     case 2:
-                        Intent intent = new Intent(view.getContext(), ConfigActivity.class);
-                        startActivity(intent);
+                        configActivity();
                         break;
                 }
 
-                FragmentManager fragmentManager =
-                        getSupportFragmentManager();
-
-                fragmentManager.beginTransaction()
-                        .replace(R.id.content_frame, fragment)
-                        .commit();
-
                 drawerList.setItemChecked(position, true);
-
-                if (position != 0) {
-                    tituloSeccion = opcionesMenu[position];
-                    getSupportActionBar().setTitle(tituloSeccion);
-                } else {
-                    tituloSeccion = (String) getTitle();
-                }
-
-
                 drawerLayout.closeDrawer(drawerList);
             }
+
         });
 
         drawerToggle = new ActionBarDrawerToggle(this,
@@ -175,7 +218,7 @@ public class MainActivity extends ActionBarActivity {
             }
 
             public void onDrawerOpened(View drawerView) {
-                getSupportActionBar().setTitle(tituloApp);
+                getSupportActionBar().setTitle(getTitle());
                 ActivityCompat.invalidateOptionsMenu(MainActivity.this);
             }
         };
@@ -186,32 +229,94 @@ public class MainActivity extends ActionBarActivity {
         getSupportActionBar().setHomeButtonEnabled(true);
     }
 
+    public void configActivity() {
+        Intent intent = new Intent(this, ConfigActivity.class);
+        startActivity(intent);
+    }
+
+    private void loadSearch() {
+
+        LoadTablesTask loadTables = new LoadTablesTask(new TableOperationCallback() {
+            @Override
+            public void onTaskDone(Object... loadedTables) {
+
+
+                tables = (List<Table>) loadedTables[0];
+
+                FragmentManager fragmentManager =
+                        getSupportFragmentManager();
+
+                fragmentManager.beginTransaction()
+                        .replace(R.id.content_frame, new SearchFragment())
+                        .commit();
+
+                tituloSeccion = "Lista de mesas";
+                getSupportActionBar().setTitle(tituloSeccion);
+                setSupportProgressBarIndeterminateVisibility(false);
+            }
+        });
+        setSupportProgressBarIndeterminateVisibility(true);
+        loadTables.execute();
+    }
+
+    /**
+     * Cargo el fragmento al inicio de la aplicación o lo recargo si vengo de otra
+     * actividad posterior.
+     */
+
+    private void loadFragmentTable() {
+        setSupportProgressBarIndeterminateVisibility(true);
+
+        LoadMyTableTask loadMyTableTask = new LoadMyTableTask(new TableOperationCallback() {
+
+            @Override
+            public void onTaskDone(Object... object) {
+
+                Table myTable = (Table) object[0];
+
+                if (myTable != null)
+                    ComparteMesaApplication.setMyTable(myTable);
+
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                fragmentManager.beginTransaction()
+                        .replace(R.id.content_frame, new TableFragment())
+                        .commit();
+
+                tituloSeccion = getTitle();
+                getSupportActionBar().setTitle(tituloSeccion);
+                setSupportProgressBarIndeterminateVisibility(false);
+
+            }
+        });
+        loadMyTableTask.execute();
+    }
+
+    public List<Table> getTables() {
+        return tables;
+    }
+
     @Override
     public void onResume() {
         super.onResume();
 
-        // Actualizo el fragmento
-        ComparteMesaApplication app = (ComparteMesaApplication) getApplication();
-        if (app.isDatabaseUpdate()) {
-            if (fragment == null || fragment instanceof TableFragment) {
-                tableFragment = new TableFragment();
-                fragment = tableFragment;
-            }
-
-            FragmentManager fragmentManager =
-                    getSupportFragmentManager();
-
-            fragmentManager.beginTransaction()
-                    .replace(R.id.content_frame, fragment)
-                    .commit();
-        }
+        loadFragmentTable();
     }
 
-    private void removeMyTable() {
+    @Override
+    public void onPause() {
+        super.onPause();
 
-        myTableSQLConfigManager myTableDb = new myTableSQLConfigManager(this, "myTableDb", null, 1);
-        myTableDb.removeMyTable();
+        // Guardo las preferencias en los estados de pausa
 
-        onResume();
+        String myUUID = ComparteMesaApplication.getMyUUID();
+
+        if (myUUID != null) {
+            int mode = Activity.MODE_PRIVATE;
+            SharedPreferences pref = getSharedPreferences("prefs", mode);
+            SharedPreferences.Editor editor = pref.edit();
+            editor.putString("myUUID", myUUID);
+            editor.commit();
+            Log.d("PREFS", "Guardada UUID: " + myUUID);
+        }
     }
 }

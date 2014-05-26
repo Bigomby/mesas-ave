@@ -4,37 +4,38 @@ import android.app.Application;
 
 import com.bigomby.compartemesa.data.Cities;
 import com.bigomby.compartemesa.data.Table;
-import com.bigomby.compartemesa.data.myTableSQLConfigManager;
 
 public class ComparteMesaApplication extends Application {
 
     public static Cities cities;
-    private boolean dbUpdated = true;
-    private Table myTable = null;
+    public static String myUUID;
+    public static Table myTable;
+    //public static final String NAMESPACE = "http://192.168.2.188/";
+    //public static final String URL = "http://192.168.2.188:8080/axis/services/mesas-ave";
+    public static final String URL = "http://esibot.es:8080/axis/services/mesas-ave";
+    public static final String NAMESPACE = "http://www.esibot.es/";
 
     static {
         cities = new Cities();
     }
 
-    public Table getMyTable() {
-
-        if (dbUpdated) {
-            myTableSQLConfigManager myTableDb = new myTableSQLConfigManager(this, "myTableDb", null, 1);
-            myTable = myTableDb.loadMyTable();
-            dbUpdated = false;
-        }
-        return myTable;
-    }
-
-    public Cities getCities() {
+    public static Cities getCities() {
         return cities;
     }
 
-    public void databaseUpdated() {
-        dbUpdated = true;
+    public static void setMyUUID(String newMyUUID) {
+        myUUID = newMyUUID;
     }
 
-    public boolean isDatabaseUpdate() {
-        return dbUpdated;
+    public static String getMyUUID() {
+        return myUUID;
+    }
+
+    public static void setMyTable(Table myNewTable) {
+        myTable = myNewTable;
+    }
+
+    public static Table getMyTable() {
+        return myTable;
     }
 }

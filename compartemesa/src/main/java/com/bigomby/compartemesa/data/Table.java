@@ -1,45 +1,60 @@
 package com.bigomby.compartemesa.data;
 
-import android.content.Context;
-import android.util.Log;
-import android.webkit.WebStorage;
-
-import com.bigomby.compartemesa.ComparteMesaApplication;
+import org.ksoap2.serialization.SoapObject;
 
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
-
+import java.util.Vector;
 
 public class Table implements Serializable {
 
-    private UUID uuid;
+    private static final long serialVersionUID = 1L;
+    private String uuid;
     private int destiny;
     private int origin;
-    private Departure departure;
     private List<User> users;
 
-    public Table(int origin, int destiny) {
-        uuid = UUID.randomUUID();
-        users = new ArrayList<User>();
-        this.origin = origin;
-        this.destiny = destiny;
+    public Table(SoapObject obj) throws Exception {
+
+        if (obj != null) {
+            String uuid = obj.getPropertyAsString(0);
+
+            if (uuid.contentEquals("0")){
+                this.uuid = uuid;
+            } else {
+
+                this.uuid = UUID.fromString(uuid).toString();
+                this.origin = Integer.parseInt(obj.getPropertyAsString(2));
+                this.destiny = Integer.parseInt(obj.getPropertyAsString(1));
+
+                users = new LinkedList<User>();
+                Vector<SoapObject> vectorUsers = (Vector) obj.getProperty(3);
+
+                for (int i = 0; i < vectorUsers.size(); i++) {
+                    users.add(new User((SoapObject) vectorUsers.get(i)));
+                }
+            }
+        } else {
+            throw new Exception("No se ha recibido ninguna mesa del servidor");
+        }
     }
 
-    public Table(int origin, int destiny, String uuid) {
-        try {
-            this.uuid = UUID.fromString(uuid);
-        } catch(Exception e) {
-            this.uuid = UUID.randomUUID();
-        }
-        users = new ArrayList<User>();
-        this.origin = origin;
-        this.destiny = destiny;
+    public Table () {
+        this.uuid = "0";
+        this.origin = -1;
+        this.destiny = -1;
+
+        users = new LinkedList<User>();
     }
 
     public String getUUID() {
-        return uuid.toString();
+        return uuid;
+    }
+
+    public String getAdminUUID() {
+        return users.get(0).getUUID();
     }
 
     public int getOrigin() {
@@ -54,17 +69,10 @@ public class Table implements Serializable {
         return users;
     }
 
-    public void addUser(String name) {
-        if (users.size() < 4) {
-            User newUser = new User(name);
-            users.add(newUser);
-        }
-    }
-
-    public void addUser(String uuid, String name) {
-        if (users.size() < 4) {
-            User newUser = new User(uuid, name);
-            users.add(newUser);
-        }
+    public void addUser(User user) throws Exception {
+        if (users.size() < 4)
+            users.add(user);
+        else
+            throw new Exception("Error: Mesa llena");
     }
 }

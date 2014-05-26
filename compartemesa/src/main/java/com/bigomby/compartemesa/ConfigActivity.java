@@ -2,15 +2,15 @@ package com.bigomby.compartemesa;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.widget.EditText;
+import android.support.v7.app.ActionBarActivity;
 import android.view.View;
+import android.widget.EditText;
+
+import com.bigomby.compartemesa.communication.ChangeNameTask;
 
 
-public class ConfigActivity extends Activity {
+public class ConfigActivity extends ActionBarActivity {
 
     SharedPreferences pref = null;
 
@@ -18,7 +18,7 @@ public class ConfigActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_config);
-
+        getSupportActionBar().setTitle("Configuración");
         EditText nombre = (EditText) findViewById(R.id.username);
         nombre.setText(loadUserName());
     }
@@ -34,8 +34,11 @@ public class ConfigActivity extends Activity {
         EditText nombre = (EditText) findViewById(R.id.username);
         String nuevonombre = nombre.getText().toString();
 
+        ChangeNameTask changeNameTask = new ChangeNameTask();
+        changeNameTask.execute(nuevonombre);
+
         SharedPreferences.Editor editor = pref.edit();
-        editor.putString("name", nuevonombre);
+        editor.putString("myName", nuevonombre);
         editor.commit();
         finish();
     }
@@ -43,6 +46,6 @@ public class ConfigActivity extends Activity {
     public String loadUserName() {
         int mode = Activity.MODE_PRIVATE;
         pref = getSharedPreferences("prefs", mode);
-        return pref.getString("name", "Usuario");
+        return pref.getString("myName", "Usuario");
     }
 }

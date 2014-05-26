@@ -1,15 +1,9 @@
 package com.bigomby.compartemesa.search;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.DialogFragment;
-import android.app.FragmentManager;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,12 +11,14 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.bigomby.compartemesa.ComparteMesaApplication;
+import com.bigomby.compartemesa.MainActivity;
 import com.bigomby.compartemesa.R;
+import com.bigomby.compartemesa.communication.JoinTableTask;
 import com.bigomby.compartemesa.data.Table;
-import com.bigomby.compartemesa.data.myTableSQLConfigManager;
-import com.bigomby.compartemesa.tables.TableFragment;
+import com.bigomby.compartemesa.interfaces.TableOperationCallback;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -31,7 +27,6 @@ import java.util.List;
 public class SearchFragment extends Fragment {
 
     private FragmentActivity myContext;
-    myTableSQLConfigManager myTableDb;
     List<Table> tables;
     int position;
 
@@ -41,11 +36,9 @@ public class SearchFragment extends Fragment {
             Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_search, container, false);
+        tables = ((MainActivity) myContext).getTables();
 
-        myTableDb = new myTableSQLConfigManager(getActivity(), "myTableDb", null, 1);
-        tables = myTableDb.loadTables();
-
-        if (!tables.isEmpty()) {
+        if (tables != null && !tables.isEmpty()) {
             List<String> titles = new ArrayList<String>();
 
             Iterator<Table> it = tables.iterator();
@@ -57,26 +50,35 @@ public class SearchFragment extends Fragment {
                 titles.add(originName + " --> " + destinyName);
             }
 
-            ListAdapter adapter = new ArrayAdapter<String>(getActivity(),
-                    android.R.layout.simple_list_item_1, titles);
+            ListAdapter adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, titles);
 
             ListView lv = (ListView) view.findViewById(R.id.tablesList);
             lv.setAdapter(adapter);
 
             lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
-                public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
-                    myTableDb.saveMyTable(tables.get(position));
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                    Fragment fragment = new TableFragment();
+                    Table table = tables.get(position);
+                    Table myTable = ComparteMesaApplication.getMyTable();
 
-                    android.support.v4.app.FragmentManager fragmentManager =
-                            myContext.getSupportFragmentManager();
+                    if (table.getUsers().size() > 3) {
+                        Toast toast1 = Toast.makeText(myContext, "La mesa está llena", Toast.LENGTH_SHORT);
+                        toast1.show();
+                    } else if (!myTable.getUUID().contentEquals("0")) {
+                        Toast toast2 = Toast.makeText(myContext, "Ya perteneces a una mesa", Toast.LENGTH_SHORT);
+                        toast2.show();
+                    } else {
 
-                    fragmentManager.beginTransaction()
-                            .replace(R.id.content_frame, fragment)
-                            .commit();
-
+                        String tableUUID = tables.get(position).getUUID();
+                        JoinTableTask joinTableTask = new JoinTableTask(new TableOperationCallback() {
+                            @Override
+                            public void onTaskDone(Object... params) {
+                                ((MainActivity) myContext).onResume();
+                            }
+                        });
+                        joinTableTask.execute(tableUUID);
+                    }
                 }
             });
         }
@@ -86,8 +88,7 @@ public class SearchFragment extends Fragment {
 
     @Override
     public void onAttach(Activity activity) {
-        myContext=(FragmentActivity) activity;
+        myContext = (FragmentActivity) activity;
         super.onAttach(activity);
     }
-
 }
