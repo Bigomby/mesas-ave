@@ -13,13 +13,13 @@
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
-    <title>Mesas AVE by Bigomby</title>
+    <title>Comparte Mesas AVE by Bigomby</title>
   </head>
 
   <body>
     <header>
       <div class="inner">
-        <h1>Mesas AVE</h1>
+        <h1>Comparte Mesas AVE</h1>
         <h2>App para Android que permite establecer comunicación entre varios usuarios que quieran compartir una mesa en el AVE.</h2>
         <a href="https://github.com/Bigomby/mesas-ave" class="button"><small>View project on</small>GitHub</a>
       </div>
@@ -29,49 +29,417 @@
       <div class="inner clearfix">
         <section id="main-content">
           <h1>
-<a name="mesas-ave" class="anchor" href="#mesas-ave"><span class="octicon octicon-link"></span></a>Mesas AVE</h1>
-
-<p>Actualmente Renfe ofrece una tarifa que resulta muy económica a la hora de viajar en AVE. Esta
-tarifa permite comprar un billete para mesas en las que pueden ir cuatro personas y que salga
-mucho más barato que un billete individual.</p>
-
-<p>El problema es que hay que ser cuatro personas, por lo que si quieres viajar de forma individual
-siendo un grupo de menos de cuatro no podrás comprar un billete para mesa.</p>
-
-<p>Aquí es donde entra en juego esta aplicación. Usando esta app podrás encontrar los compañeros que
-te falten y así poder comprar billete para mesa y ahorrarte dinero.</p>
-
-<p>La aplicación tratará de emparejarte formando grupos de cuatro, una vez formado el grupo
-establecerá un chat que permitirá la comunicación para poder ponerse de acuerdo y comprar
-el billete.</p>
+<a name="comparte-mesa" class="anchor" href="#comparte-mesa"><span class="octicon octicon-link"></span></a>Comparte Mesa</h1>
 
 <h2>
-<a name="trabajar-en-una-rama" class="anchor" href="#trabajar-en-una-rama"><span class="octicon octicon-link"></span></a>Trabajar en una rama</h2>
+<a name="motivaci%C3%B3n" class="anchor" href="#motivaci%C3%B3n"><span class="octicon octicon-link"></span></a>Motivación</h2>
 
-<p>Primer haz un fork a tu cuenta del repositorio. Para descargar el repositorio:</p>
+<p>Actualmente RENFE ofrece una tarifa que resulta muy económica a la hora de viajar en AVE. Esta tarifa permite comprar un billete de una mesa en las que pueden ir cuatro personas en lugar de forma individual. El precio por persona es del 60% comparado con el billete individuale estándar.</p>
 
-<pre><code>$ git clone
-</code></pre>
+<p>Para usar esta tarifa y que resulte económica es necesario ser cuatro personas, aquí es donde entra en juego nuestra aplicación. Usando esta app se puede encontrar los compañeros que falten y así poder comprar billete para mesa, ahorrando dinero.</p>
 
-<p>Para cambiar a una rama:</p>
+<p>La aplicación tratará de emparejar al usuario formando grupos de cuatro, una vez formado el grupo establecerá un chat que permitirá la comunicación para poder ponerse de acuerdo y comprar el billete.</p>
 
-<pre><code>$ git branch &lt;rama&gt;
-</code></pre>
+<h2>
+<a name="resumen" class="anchor" href="#resumen"><span class="octicon octicon-link"></span></a>Resumen</h2>
 
-<p>Para hacer un commit:</p>
+<p>La Aplicación, a rasgos generales, lo que hace es dar al usuario la posibilidad de encontrar, si existiera, un grupo de tres personas más que compartan el origen, el destino y el horario de su viaje para así poder aprovechar de la tarifa de mesa.</p>
 
-<pre><code>$ git commit -a "Aquí va el commit"
-</code></pre>
+<h3>
+<a name="estado-de-la-aplicaci%C3%B3n" class="anchor" href="#estado-de-la-aplicaci%C3%B3n"><span class="octicon octicon-link"></span></a>Estado de la aplicación</h3>
 
-<p>Para hacer un push:</p>
+<p>La aplicación se encuentra en fase beta. Por ahora las funcionalidades disponibles son:</p>
 
-<pre><code>$ git push
-</code></pre>
+<ul>
+<li>Crear mesa seleccionando origen, destino y tiempo de salida del tren.</li>
+<li>Listar las mesas creadas por otros usarios y unirse a una de ellas.</li>
+<li>Eliminar y salirse de las mesas.</li>
+<li>Configurar un nombre de usuario.</li>
+<li>Servidor AXIS2 para servir los datos de las mesas a los clientes.</li>
+<li>Clientes con librerías KSOAP2 para consumir el servicio web proporcionado por AXIS2.</li>
+</ul><p>Funcionalidades a implementar en el futuro:</p>
 
-<p>Cuando esté listo el trabajo haces un Pul Request</p>
+<ul>
+<li>Migrar el servidor a Node.JS.</li>
+<li>Usar GCM para notificaciones PUSH.</li>
+<li>Servidor XMPP para el chat multiusuario.</li>
+<li>Login mediante cuenta de Google+, Facebook o Twitter.</li>
+<li>Compartir enlace a mesas por redes sociales.</li>
+<li>Perfiles de usuario con valoraciones.</li>
+<li>Opción de aumentar la visibilidad de una mesa mediante micropagos.</li>
+</ul><h2>
+<a name="estructura-de-la-aplicaci%C3%B3n" class="anchor" href="#estructura-de-la-aplicaci%C3%B3n"><span class="octicon octicon-link"></span></a>Estructura de la aplicación</h2>
 
-<hr><p><strong>ATENCIÓN:</strong> Esta aplicación y su autor no están vinculados de <strong>ninguna forma</strong> con RENFE, es una
-aplicación totalmente extraoficial.</p>
+<p>Ahora pasamos a describir como hemos desarrollado la aplicación explicando los aspectos más destacados de el código de la misma.</p>
+
+<h3>
+<a name="packet-data" class="anchor" href="#packet-data"><span class="octicon octicon-link"></span></a>Packet: data</h3>
+
+<p>Aquí se encuentran todos objetos que almacenan información. Tenemos los siguientes:</p>
+
+<ul>
+<li>
+<code>Cities.java</code>: Se usa para mapear enteros a ciudades. Cada entero representa una ciudad y este objeto se encarga de convertir cada entero a su correspondiente String. En el futuro será capaz de conocer a qué ciudad destino se puede llegar desde qué ciudad origen. Por ahora simplemente está implementando el mapeo.</li>
+<li>
+<code>User.java</code>: Almacena información de usuarios. Por ejemplo el nombre, el email o la contraseña. Por ahora sólo está implementado el nombre. Además tiene un campo que es un ID único por cada usuario.</li>
+<li>
+<code>Table.java</code>: Representa una mesa. Tiene un ID único, un origen, un destino, una hora de salida y una lista de hasta cuatro usuario. El primero usuario es el que la creó y el único que puede borrarla, los demás usuario sólo pueden abandonarla.</li>
+</ul><h3>
+<a name="packet-tables" class="anchor" href="#packet-tables"><span class="octicon octicon-link"></span></a>Packet: tables</h3>
+
+<p>Este paquete contiene lo referente a las mesas.</p>
+
+<ul>
+<li>
+<code>TableFragment.java</code>: Es el fragmento que muesetra toda la información de la mesa a la que estamos asociado. Si no hay ninguna mesa a la que estemos asociado, nos mostrará un botón para crear una mesa nueva. Entre las cosas que muestra nos encontramos el origen y el destino, la lista de los usuarios que están unidos actualmente a la mesa y un chat para la comunicación (acualmente no implementado).</li>
+<li>
+<code>AddTableActivity.java</code>: Actividad encargada de mostrar la interfaz para crear una nueva mesa. Nos permite elegir el origen, el destino y una hora de salida.</li>
+</ul><h3>
+<a name="packet-search" class="anchor" href="#packet-search"><span class="octicon octicon-link"></span></a>Packet: search</h3>
+
+<ul>
+<li>
+<code>SearchFragment</code>: Este framento nos muestra las mesas que han sido creadas en el servidor. Se muestra el origen y el destino y podemos unirnos a la que más nos convenga. En el futuro implementará un filtro por origen y destino. También podría ser interesante que hubiese algunas mesas "patrocinadas" que apareciesen en posiciones más altas si el usuario ha efectuado un pago.</li>
+</ul><h3>
+<a name="packet-interfaces" class="anchor" href="#packet-interfaces"><span class="octicon octicon-link"></span></a>Packet: interfaces</h3>
+
+<p>Este paquete contine interfaces usadas por nuestro programa.</p>
+
+<ul>
+<li>
+<code>TableOperationCallback</code>: Esta interfaz se usa para funciones de callbacks en tareas asíncronas que realizan conexiones contra el servidor.</li>
+</ul><h3>
+<a name="packet-communication" class="anchor" href="#packet-communication"><span class="octicon octicon-link"></span></a>Packet communication</h3>
+
+<p>Este paquete contiene objetos que heredan de la clase <code>AsyncTask</code>, que ejecutan una tarea en un hilo independiente y, al finalizar ejecutan un método. Hemos aprovechado este método para llamar a una función de callback usando la interfaz <code>TableOperationCallback</code>. De esta nuestro programa funciona de forma totalmente asíncrona sin tiempos de espera en el hilo de la interfaz gráfica. El propósito de todas estos objetos es la comunicación con el servidor por medio de KSOAP2.</p>
+
+<ul>
+<li>
+<code>ChangeNameTask</code>: Se usa para cambiar el nombre de usuario.</li>
+<li>
+<code>CreateTableTask</code>: Crea una mesa en el servidor.</li>
+<li>
+<code>CreateUserTask</code>: Crea un usuario en el servidor.</li>
+<li>
+<code>JoinTableTask</code>: Se usa para unirse a una mesa ya existente en el servidor.</li>
+<li>
+<code>LoadMyTableTask</code>: Se usa para preguntar al servidor si estamos en alguna mesa y, en caso afirmativo, descargarnos los datos de tal mesa.</li>
+<li>
+<code>LoadTablesTask</code>: Descarga una lista de las mesas que se encuentran en el servidor.</li>
+<li>
+<code>RemoveMyTableTask</code>: Dejamos una mesa a la que pertenecemos. En caso de ser el dueño de esta mesa el servidor la eliminará.</li>
+</ul><h3>
+<a name="compartemesaapplicationjava" class="anchor" href="#compartemesaapplicationjava"><span class="octicon octicon-link"></span></a>ComparteMesaApplication.java</h3>
+
+<p>Es un objeto de clase aplicación. Su cometido es ofrecer "variables globales" y métodos estáticos para almacenar objetos a los que necesitaremos acceder desde diferentes partes de la aplicación.</p>
+
+<h3>
+<a name="configactivityjava" class="anchor" href="#configactivityjava"><span class="octicon octicon-link"></span></a>ConfigActivity.java</h3>
+
+<p>Es una actividad que simplemente nos permite cambiar nuestro nombre de usuario por ahora.</p>
+
+<h3>
+<a name="mainactivityjava" class="anchor" href="#mainactivityjava"><span class="octicon octicon-link"></span></a>MainActivity.java</h3>
+
+<p>Es la actividad principal de la aplicación y la más importante. vamos a detallar sus métodos.</p>
+
+<h4>
+<a name="oncreate" class="anchor" href="#oncreate"><span class="octicon octicon-link"></span></a>OnCreate()</h4>
+
+<p>Se carga el layout en pantalla. Después se cargan las preferencias y se llama a la función <code>init()</code> que inicia la interfaz de la aplicación.</p>
+
+<div class="highlight highlight-java"><pre><span class="kd">public</span> <span class="kt">void</span> <span class="nf">onCreate</span><span class="o">(</span><span class="n">Bundle</span> <span class="n">savedInstanceState</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kd">super</span><span class="o">.</span><span class="na">onCreate</span><span class="o">(</span><span class="n">savedInstanceState</span><span class="o">);</span>
+        <span class="n">supportRequestWindowFeature</span><span class="o">(</span><span class="n">Window</span><span class="o">.</span><span class="na">FEATURE_INDETERMINATE_PROGRESS</span><span class="o">);</span>
+        <span class="n">setContentView</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">layout</span><span class="o">.</span><span class="na">activity_main</span><span class="o">);</span>
+
+        <span class="c1">// Cargo las preferencias</span>
+        <span class="n">loadPrefs</span><span class="o">();</span>
+
+        <span class="c1">// Inicializo el NavigationDrawer y la ActionBar</span>
+        <span class="n">init</span><span class="o">();</span>
+
+    <span class="o">}</span>
+</pre></div>
+
+<h3>
+<a name="loadprefs" class="anchor" href="#loadprefs"><span class="octicon octicon-link"></span></a>loadPrefs()</h3>
+
+<p>Usamos un objejto <code>SharedPreferences</code> para almacenar nuestro ID de usuario. Si no tenemos ninguno le pedirmemos al servidor que nos de de alta y nos proporciene uno.</p>
+
+<p>Puede verse como hemos usado una función de callback con una tarea asíncrona para comunicarnos con el servidor. Usamos la misma filosofía durante toda la aplicación.</p>
+
+<div class="highlight highlight-java"><pre><span class="kd">private</span> <span class="kt">void</span> <span class="nf">loadPrefs</span><span class="o">()</span> <span class="o">{</span>
+        <span class="kt">int</span> <span class="n">mode</span> <span class="o">=</span> <span class="n">Activity</span><span class="o">.</span><span class="na">MODE_PRIVATE</span><span class="o">;</span>
+        <span class="kd">final</span> <span class="n">SharedPreferences</span> <span class="n">pref</span> <span class="o">=</span> <span class="n">getSharedPreferences</span><span class="o">(</span><span class="s">"prefs"</span><span class="o">,</span> <span class="n">mode</span><span class="o">);</span>
+        <span class="n">String</span> <span class="n">myUUID</span> <span class="o">=</span> <span class="n">pref</span><span class="o">.</span><span class="na">getString</span><span class="o">(</span><span class="s">"myUUID"</span><span class="o">,</span> <span class="s">"null"</span><span class="o">);</span>
+        <span class="n">String</span> <span class="n">myName</span> <span class="o">=</span> <span class="n">pref</span><span class="o">.</span><span class="na">getString</span><span class="o">(</span><span class="s">"myName"</span><span class="o">,</span> <span class="s">"Usuario"</span><span class="o">);</span>
+
+        <span class="n">Log</span><span class="o">.</span><span class="na">d</span><span class="o">(</span><span class="s">"PREFS"</span><span class="o">,</span> <span class="s">"Cargada UUID: "</span> <span class="o">+</span> <span class="n">myUUID</span><span class="o">);</span>
+
+        <span class="c1">// Cargo el UUID almacenado, si no hay ninguno pido uno nuevo al servidor</span>
+
+        <span class="k">if</span> <span class="o">(</span><span class="n">myUUID</span><span class="o">.</span><span class="na">contentEquals</span><span class="o">(</span><span class="s">"null"</span><span class="o">))</span> <span class="o">{</span>
+            <span class="n">CreateUser</span> <span class="n">createUser</span> <span class="o">=</span> <span class="k">new</span> <span class="n">CreateUser</span><span class="o">(</span><span class="k">new</span> <span class="n">TableOperationCallback</span><span class="o">()</span> <span class="o">{</span>
+                <span class="nd">@Override</span>
+                <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onTaskDone</span><span class="o">(</span><span class="n">Object</span><span class="o">...</span> <span class="n">params</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">String</span> <span class="n">myName</span> <span class="o">=</span> <span class="n">pref</span><span class="o">.</span><span class="na">getString</span><span class="o">(</span><span class="s">"myName"</span><span class="o">,</span> <span class="s">"User"</span><span class="o">);</span>
+
+                    <span class="n">ChangeNameTask</span> <span class="n">changeNameTask</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ChangeNameTask</span><span class="o">();</span>
+                    <span class="n">changeNameTask</span><span class="o">.</span><span class="na">execute</span><span class="o">(</span><span class="n">myName</span><span class="o">);</span>
+                <span class="o">}</span>
+            <span class="o">});</span>
+            <span class="n">createUser</span><span class="o">.</span><span class="na">execute</span><span class="o">(</span><span class="n">myName</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+            <span class="n">ComparteMesaApplication</span><span class="o">.</span><span class="na">setMyUUID</span><span class="o">(</span><span class="n">myUUID</span><span class="o">);</span>
+            <span class="n">Log</span><span class="o">.</span><span class="na">d</span><span class="o">(</span><span class="s">"MAIN"</span><span class="o">,</span> <span class="s">"Iniciada aplicación con UUID: "</span> <span class="o">+</span> <span class="n">ComparteMesaApplication</span><span class="o">.</span><span class="na">getMyUUID</span><span class="o">());</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+</pre></div>
+
+<h4>
+<a name="drawernavigation" class="anchor" href="#drawernavigation"><span class="octicon octicon-link"></span></a>DrawerNavigation</h4>
+
+<p>Hemos usado un DrawerNavigation por lo que necesitamos algunos métodos para iniciarlo correctamente:</p>
+
+<div class="highlight highlight-java"><pre>    <span class="cm">/**</span>
+<span class="cm">     * Función de callback para el NavigationDrawer y la ActionBar</span>
+<span class="cm">     */</span>
+    <span class="nd">@Override</span>
+    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onPostCreate</span><span class="o">(</span><span class="n">Bundle</span> <span class="n">savedInstanceState</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kd">super</span><span class="o">.</span><span class="na">onPostCreate</span><span class="o">(</span><span class="n">savedInstanceState</span><span class="o">);</span>
+        <span class="n">drawerToggle</span><span class="o">.</span><span class="na">syncState</span><span class="o">();</span>
+    <span class="o">}</span>
+</pre></div>
+
+<div class="highlight highlight-java"><pre>    <span class="cm">/**</span>
+<span class="cm">     * Función de callback para el NavigationDrawer y la ActionBar</span>
+<span class="cm">     */</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onConfigurationChanged</span><span class="o">(</span><span class="n">Configuration</span> <span class="n">newConfig</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kd">super</span><span class="o">.</span><span class="na">onConfigurationChanged</span><span class="o">(</span><span class="n">newConfig</span><span class="o">);</span>
+        <span class="n">drawerToggle</span><span class="o">.</span><span class="na">onConfigurationChanged</span><span class="o">(</span><span class="n">newConfig</span><span class="o">);</span>
+    <span class="o">}</span>
+</pre></div>
+
+<div class="highlight highlight-java"><pre>    <span class="cm">/**</span>
+<span class="cm">     * Inicializo el NavigatonDrawer y la ActionBar</span>
+<span class="cm">     */</span>
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">init</span><span class="o">()</span> <span class="o">{</span>
+            <span class="kd">final</span> <span class="n">String</span><span class="o">[]</span> <span class="n">opcionesMenu</span> <span class="o">=</span> <span class="n">getResources</span><span class="o">().</span><span class="na">getStringArray</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">array</span><span class="o">.</span><span class="na">navigation_drawer_elements</span><span class="o">);</span>
+            <span class="kd">final</span> <span class="n">DrawerLayout</span> <span class="n">drawerLayout</span> <span class="o">=</span> <span class="o">(</span><span class="n">DrawerLayout</span><span class="o">)</span> <span class="n">findViewById</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">drawer_layout</span><span class="o">);</span>
+            <span class="kd">final</span> <span class="n">ListView</span> <span class="n">drawerList</span> <span class="o">=</span> <span class="o">(</span><span class="n">ListView</span><span class="o">)</span> <span class="n">findViewById</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">left_drawer</span><span class="o">);</span>
+
+            <span class="n">drawerList</span><span class="o">.</span><span class="na">setAdapter</span><span class="o">(</span><span class="k">new</span> <span class="n">ArrayAdapter</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;(</span>
+                    <span class="n">getSupportActionBar</span><span class="o">().</span><span class="na">getThemedContext</span><span class="o">(),</span>
+                    <span class="n">android</span><span class="o">.</span><span class="na">R</span><span class="o">.</span><span class="na">layout</span><span class="o">.</span><span class="na">simple_list_item_1</span><span class="o">,</span> <span class="n">opcionesMenu</span><span class="o">));</span>
+
+            <span class="n">drawerList</span><span class="o">.</span><span class="na">setOnItemClickListener</span><span class="o">(</span><span class="k">new</span> <span class="n">AdapterView</span><span class="o">.</span><span class="na">OnItemClickListener</span><span class="o">()</span> <span class="o">{</span>
+                <span class="nd">@Override</span>
+                <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onItemClick</span><span class="o">(</span><span class="n">AdapterView</span> <span class="n">parent</span><span class="o">,</span> <span class="n">View</span> <span class="n">view</span><span class="o">,</span>
+                                        <span class="kt">int</span> <span class="n">position</span><span class="o">,</span> <span class="kt">long</span> <span class="n">id</span><span class="o">)</span> <span class="o">{</span>
+
+                    <span class="k">switch</span> <span class="o">(</span><span class="n">position</span><span class="o">)</span> <span class="o">{</span>
+                        <span class="k">case</span> <span class="mi">0</span><span class="o">:</span>
+                            <span class="n">loadFragmentTable</span><span class="o">();</span>
+                            <span class="k">break</span><span class="o">;</span>
+                        <span class="k">case</span> <span class="mi">1</span><span class="o">:</span>
+                            <span class="n">loadSearch</span><span class="o">();</span>
+                            <span class="k">break</span><span class="o">;</span>
+                        <span class="k">case</span> <span class="mi">2</span><span class="o">:</span>
+                            <span class="n">configActivity</span><span class="o">();</span>
+                            <span class="k">break</span><span class="o">;</span>
+                    <span class="o">}</span>
+
+                    <span class="n">drawerList</span><span class="o">.</span><span class="na">setItemChecked</span><span class="o">(</span><span class="n">position</span><span class="o">,</span> <span class="kc">true</span><span class="o">);</span>
+                    <span class="n">drawerLayout</span><span class="o">.</span><span class="na">closeDrawer</span><span class="o">(</span><span class="n">drawerList</span><span class="o">);</span>
+                <span class="o">}</span>
+
+            <span class="o">});</span>
+
+            <span class="n">drawerToggle</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ActionBarDrawerToggle</span><span class="o">(</span><span class="k">this</span><span class="o">,</span>
+                    <span class="n">drawerLayout</span><span class="o">,</span>
+                    <span class="n">R</span><span class="o">.</span><span class="na">drawable</span><span class="o">.</span><span class="na">ic_navigation_drawer</span><span class="o">,</span>
+                    <span class="n">R</span><span class="o">.</span><span class="na">string</span><span class="o">.</span><span class="na">drawer_open</span><span class="o">,</span>
+                    <span class="n">R</span><span class="o">.</span><span class="na">string</span><span class="o">.</span><span class="na">drawer_close</span><span class="o">)</span> <span class="o">{</span>
+
+                <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onDrawerClosed</span><span class="o">(</span><span class="n">View</span> <span class="n">view</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">getSupportActionBar</span><span class="o">().</span><span class="na">setTitle</span><span class="o">(</span><span class="n">tituloSeccion</span><span class="o">);</span>
+                    <span class="n">ActivityCompat</span><span class="o">.</span><span class="na">invalidateOptionsMenu</span><span class="o">(</span><span class="n">MainActivity</span><span class="o">.</span><span class="na">this</span><span class="o">);</span>
+                <span class="o">}</span>
+
+                <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onDrawerOpened</span><span class="o">(</span><span class="n">View</span> <span class="n">drawerView</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">getSupportActionBar</span><span class="o">().</span><span class="na">setTitle</span><span class="o">(</span><span class="n">getTitle</span><span class="o">());</span>
+                    <span class="n">ActivityCompat</span><span class="o">.</span><span class="na">invalidateOptionsMenu</span><span class="o">(</span><span class="n">MainActivity</span><span class="o">.</span><span class="na">this</span><span class="o">);</span>
+                <span class="o">}</span>
+            <span class="o">};</span>
+
+            <span class="n">drawerLayout</span><span class="o">.</span><span class="na">setDrawerListener</span><span class="o">(</span><span class="n">drawerToggle</span><span class="o">);</span>
+
+            <span class="n">getSupportActionBar</span><span class="o">().</span><span class="na">setDisplayHomeAsUpEnabled</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+            <span class="n">getSupportActionBar</span><span class="o">().</span><span class="na">setHomeButtonEnabled</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+        <span class="o">}</span>
+</pre></div>
+
+<div class="highlight highlight-java"><pre>    <span class="cm">/**</span>
+<span class="cm">     * Función de callback para el NavigationDrawer y la ActionBar</span>
+<span class="cm">     */</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">onOptionsItemSelected</span><span class="o">(</span><span class="n">MenuItem</span> <span class="n">item</span><span class="o">)</span> <span class="o">{</span>
+
+        <span class="k">if</span> <span class="o">(</span><span class="n">drawerToggle</span><span class="o">.</span><span class="na">onOptionsItemSelected</span><span class="o">(</span><span class="n">item</span><span class="o">))</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
+        <span class="o">}</span>
+
+        <span class="c1">// Handle presses on the action bar items</span>
+        <span class="n">Intent</span> <span class="n">intent</span><span class="o">;</span>
+        <span class="k">switch</span> <span class="o">(</span><span class="n">item</span><span class="o">.</span><span class="na">getItemId</span><span class="o">())</span> <span class="o">{</span>
+            <span class="k">case</span> <span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">action_add</span><span class="o">:</span>
+                <span class="n">intent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="n">AddTableActivity</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+                <span class="n">startActivity</span><span class="o">(</span><span class="n">intent</span><span class="o">);</span>
+                <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
+            <span class="k">case</span> <span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">action_discard</span><span class="o">:</span>
+                <span class="n">deleteTable</span><span class="o">();</span>
+                <span class="n">onResume</span><span class="o">();</span>
+                <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
+            <span class="k">default</span><span class="o">:</span>
+                <span class="k">return</span> <span class="kd">super</span><span class="o">.</span><span class="na">onOptionsItemSelected</span><span class="o">(</span><span class="n">item</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+</pre></div>
+
+<div class="highlight highlight-java"><pre>    <span class="cm">/**</span>
+<span class="cm">     * Función de callback para el botón añadir cuando no hay mesas</span>
+<span class="cm">     */</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onClick</span><span class="o">(</span><span class="n">View</span> <span class="n">view</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">view</span><span class="o">.</span><span class="na">getId</span><span class="o">()</span> <span class="o">==</span> <span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">create_table</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">Intent</span> <span class="n">intent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="n">AddTableActivity</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+            <span class="n">startActivity</span><span class="o">(</span><span class="n">intent</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+</pre></div>
+
+<h4>
+<a name="configactivity" class="anchor" href="#configactivity"><span class="octicon octicon-link"></span></a>configActivity()</h4>
+
+<p>Aquí llamamos a la actividad <code>ConfigActivity</code>.</p>
+
+<div class="highlight highlight-java"><pre>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">configActivity</span><span class="o">()</span> <span class="o">{</span>
+        <span class="n">Intent</span> <span class="n">intent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="n">ConfigActivity</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+        <span class="n">startActivity</span><span class="o">(</span><span class="n">intent</span><span class="o">);</span>
+    <span class="o">}</span>
+</pre></div>
+
+<h4>
+<a name="loadsearch" class="anchor" href="#loadsearch"><span class="octicon octicon-link"></span></a>loadSearch()</h4>
+
+<p>Cargamos las mesas en el servidor y llamamos al fragmento <code>SearchFragment</code> para que nos las muestre en una lista.</p>
+
+<div class="highlight highlight-java"><pre>    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">loadSearch</span><span class="o">()</span> <span class="o">{</span>
+
+        <span class="n">LoadTablesTask</span> <span class="n">loadTables</span> <span class="o">=</span> <span class="k">new</span> <span class="n">LoadTablesTask</span><span class="o">(</span><span class="k">new</span> <span class="n">TableOperationCallback</span><span class="o">()</span> <span class="o">{</span>
+            <span class="nd">@Override</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onTaskDone</span><span class="o">(</span><span class="n">Object</span><span class="o">...</span> <span class="n">loadedTables</span><span class="o">)</span> <span class="o">{</span>
+
+
+                <span class="n">tables</span> <span class="o">=</span> <span class="o">(</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Table</span><span class="o">&gt;)</span> <span class="n">loadedTables</span><span class="o">[</span><span class="mi">0</span><span class="o">];</span>
+
+                <span class="n">FragmentManager</span> <span class="n">fragmentManager</span> <span class="o">=</span>
+                        <span class="n">getSupportFragmentManager</span><span class="o">();</span>
+
+                <span class="n">fragmentManager</span><span class="o">.</span><span class="na">beginTransaction</span><span class="o">()</span>
+                        <span class="o">.</span><span class="na">replace</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">content_frame</span><span class="o">,</span> <span class="k">new</span> <span class="n">SearchFragment</span><span class="o">())</span>
+                        <span class="o">.</span><span class="na">commit</span><span class="o">();</span>
+
+                <span class="n">tituloSeccion</span> <span class="o">=</span> <span class="s">"Lista de mesas"</span><span class="o">;</span>
+                <span class="n">getSupportActionBar</span><span class="o">().</span><span class="na">setTitle</span><span class="o">(</span><span class="n">tituloSeccion</span><span class="o">);</span>
+                <span class="n">setSupportProgressBarIndeterminateVisibility</span><span class="o">(</span><span class="kc">false</span><span class="o">);</span>
+            <span class="o">}</span>
+        <span class="o">});</span>
+        <span class="n">setSupportProgressBarIndeterminateVisibility</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+        <span class="n">loadTables</span><span class="o">.</span><span class="na">execute</span><span class="o">();</span>
+    <span class="o">}</span>
+</pre></div>
+
+<h4>
+<a name="loadfragmenttable" class="anchor" href="#loadfragmenttable"><span class="octicon octicon-link"></span></a>loadFragmentTable()</h4>
+
+<p>Descargamos del servidor los datos de la mesa a la que pertenecemos, en caso de pertenecer a alguna, y tras cargar los datos mostramos el fragmento para que nos los muestre.</p>
+
+<div class="highlight highlight-java"><pre>        <span class="kd">private</span> <span class="kt">void</span> <span class="nf">loadFragmentTable</span><span class="o">()</span> <span class="o">{</span>
+            <span class="n">setSupportProgressBarIndeterminateVisibility</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+
+            <span class="n">LoadMyTableTask</span> <span class="n">loadMyTableTask</span> <span class="o">=</span> <span class="k">new</span> <span class="n">LoadMyTableTask</span><span class="o">(</span><span class="k">new</span> <span class="n">TableOperationCallback</span><span class="o">()</span> <span class="o">{</span>
+
+                <span class="nd">@Override</span>
+                <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onTaskDone</span><span class="o">(</span><span class="n">Object</span><span class="o">...</span> <span class="n">object</span><span class="o">)</span> <span class="o">{</span>
+
+                    <span class="n">Table</span> <span class="n">myTable</span> <span class="o">=</span> <span class="o">(</span><span class="n">Table</span><span class="o">)</span> <span class="n">object</span><span class="o">[</span><span class="mi">0</span><span class="o">];</span>
+
+                    <span class="k">if</span> <span class="o">(</span><span class="n">myTable</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span>
+                        <span class="n">ComparteMesaApplication</span><span class="o">.</span><span class="na">setMyTable</span><span class="o">(</span><span class="n">myTable</span><span class="o">);</span>
+
+                    <span class="n">FragmentManager</span> <span class="n">fragmentManager</span> <span class="o">=</span> <span class="n">getSupportFragmentManager</span><span class="o">();</span>
+                    <span class="n">fragmentManager</span><span class="o">.</span><span class="na">beginTransaction</span><span class="o">()</span>
+                            <span class="o">.</span><span class="na">replace</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">content_frame</span><span class="o">,</span> <span class="k">new</span> <span class="n">TableFragment</span><span class="o">())</span>
+                            <span class="o">.</span><span class="na">commit</span><span class="o">();</span>
+
+                    <span class="n">tituloSeccion</span> <span class="o">=</span> <span class="n">getTitle</span><span class="o">();</span>
+                    <span class="n">getSupportActionBar</span><span class="o">().</span><span class="na">setTitle</span><span class="o">(</span><span class="n">tituloSeccion</span><span class="o">);</span>
+                    <span class="n">setSupportProgressBarIndeterminateVisibility</span><span class="o">(</span><span class="kc">false</span><span class="o">);</span>
+
+                <span class="o">}</span>
+            <span class="o">});</span>
+            <span class="n">loadMyTableTask</span><span class="o">.</span><span class="na">execute</span><span class="o">();</span>
+        <span class="o">}</span>
+</pre></div>
+
+<h4>
+<a name="onresume-y-onpause" class="anchor" href="#onresume-y-onpause"><span class="octicon octicon-link"></span></a>onResume() y onPause()</h4>
+
+<p>Usamos <code>onPause()</code> para guardar las preferencias y <code>onResume</code> para recargar el fragmento principal <code>TableFragment</code>.</p>
+
+<div class="highlight highlight-java"><pre>    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onResume</span><span class="o">()</span> <span class="o">{</span>
+        <span class="kd">super</span><span class="o">.</span><span class="na">onResume</span><span class="o">();</span>
+
+        <span class="n">loadFragmentTable</span><span class="o">();</span>
+    <span class="o">}</span>
+</pre></div>
+
+<div class="highlight highlight-java"><pre>    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onPause</span><span class="o">()</span> <span class="o">{</span>
+        <span class="kd">super</span><span class="o">.</span><span class="na">onPause</span><span class="o">();</span>
+
+        <span class="c1">// Guardo las preferencias en los estados de pausa</span>
+
+        <span class="n">String</span> <span class="n">myUUID</span> <span class="o">=</span> <span class="n">ComparteMesaApplication</span><span class="o">.</span><span class="na">getMyUUID</span><span class="o">();</span>
+
+        <span class="k">if</span> <span class="o">(</span><span class="n">myUUID</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="kt">int</span> <span class="n">mode</span> <span class="o">=</span> <span class="n">Activity</span><span class="o">.</span><span class="na">MODE_PRIVATE</span><span class="o">;</span>
+            <span class="n">SharedPreferences</span> <span class="n">pref</span> <span class="o">=</span> <span class="n">getSharedPreferences</span><span class="o">(</span><span class="s">"prefs"</span><span class="o">,</span> <span class="n">mode</span><span class="o">);</span>
+            <span class="n">SharedPreferences</span><span class="o">.</span><span class="na">Editor</span> <span class="n">editor</span> <span class="o">=</span> <span class="n">pref</span><span class="o">.</span><span class="na">edit</span><span class="o">();</span>
+            <span class="n">editor</span><span class="o">.</span><span class="na">putString</span><span class="o">(</span><span class="s">"myUUID"</span><span class="o">,</span> <span class="n">myUUID</span><span class="o">);</span>
+            <span class="n">editor</span><span class="o">.</span><span class="na">commit</span><span class="o">();</span>
+            <span class="n">Log</span><span class="o">.</span><span class="na">d</span><span class="o">(</span><span class="s">"PREFS"</span><span class="o">,</span> <span class="s">"Guardada UUID: "</span> <span class="o">+</span> <span class="n">myUUID</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+</pre></div>
+
+<h4>
+<a name="gettables" class="anchor" href="#gettables"><span class="octicon octicon-link"></span></a>getTables()</h4>
+
+<p>Disponemos de una función que usará el fragmento <code>SearchFragment</code> para obtener las mesas una vez recibidas del servidor.</p>
+
+<div class="highlight highlight-java"><pre>   <span class="kd">public</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">Table</span><span class="o">&gt;</span> <span class="nf">getTables</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">tables</span><span class="o">;</span>
+    <span class="o">}</span>
+</pre></div>
+
+<h2>
+<a name="conclusi%C3%B3n" class="anchor" href="#conclusi%C3%B3n"><span class="octicon octicon-link"></span></a>Conclusión</h2>
+
+<p>Se puede decir que la aplicación aún tiene mucho que avanzar, ya que ahora mismo no es funcional. Sin embargo, ha sido un muy buen comienzo para aprender las bases de programación de Android y en un futuro cercano llegar a mejorarla lo suficiente como para poder subirla a Google Play.</p>
         </section>
 
         <aside id="sidebar">
